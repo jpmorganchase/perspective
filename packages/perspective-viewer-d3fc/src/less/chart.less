@@ -221,6 +221,40 @@
             content: "\1f845";
         }
 
+        & .y-label-container, & .y2-label-container {
+            position: relative;
+        }
+
+        & .series-picker {
+            position: absolute;
+            bottom: -48px;
+            width: 24px;
+            height: 24px;
+            padding: 2px;
+            box-sizing: border-box;
+            border: 1px solid transparent;
+            border-radius: 5px;
+            cursor: pointer;
+
+            & svg {
+                width: 20px;
+                height: 20px;
+                fill: var(--d3fc-series-picker, rgb(150, 170, 180));
+                stroke: var(--d3fc-series-picker, rgb(150, 170, 180));
+            }
+
+            transition: 100ms background-color;
+            &:hover {
+                border-color: #aaa;
+            }
+        }
+        & .y-label-container .series-picker {
+            left: 0;
+        }
+        & .y2-label-container .series-picker {
+            right: 0;
+        }
+
         &.d3_y_bar .y-axis path,
         &.d3_y_line .y-axis path,
         &.d3_y_area .y-axis path,

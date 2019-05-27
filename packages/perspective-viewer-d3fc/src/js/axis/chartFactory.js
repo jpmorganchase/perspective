@@ -15,6 +15,8 @@ export const chartCanvasFactory = (xAxis, yAxis) => chartFactory(xAxis, yAxis, f
 const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
     let axisSplitter = null;
     let altAxis = null;
+    let altPlotArea = null;
+    let altXScale = null;
 
     const chart = cartesian({
         xScale: xAxis.scale,
@@ -56,6 +58,22 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
             return altAxis;
         }
         altAxis = args[0];
+        return chart;
+    };
+
+    chart.altPlotArea = (...args) => {
+        if (!args.length) {
+            return altPlotArea;
+        }
+        altPlotArea = args[0];
+        return chart;
+    };
+
+    chart.altXScale = (...args) => {
+        if (!args.length) {
+            return altXScale;
+        }
+        altXScale = args[0];
         return chart;
     };
 
@@ -112,14 +130,19 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
                 });
 
             // Render all the series using either the primary or alternate y-scales
+            const plotAreas = [chart.plotArea(), altPlotArea || chart.plotArea()];
+            const xScales = [xAxis.scale, altXScale || xAxis.scale];
+            const yScales = [yAxis.scale, y2Scale];
             if (canvas) {
                 const drawMultiCanvasSeries = selection => {
-                    const canvasPlotArea = chart.plotArea();
-                    canvasPlotArea.context(selection.node().getContext("2d")).xScale(xAxis.scale);
+                    if (altXScale) altXScale.range(xAxis.scale.range());
 
-                    const yScales = [yAxis.scale, y2Scale];
                     [data, altData].forEach((d, i) => {
-                        canvasPlotArea.yScale(yScales[i]);
+                        const canvasPlotArea = plotAreas[i];
+                        canvasPlotArea
+                            .context(selection.node().getContext("2d"))
+                            .xScale(xScales[i])
+                            .yScale(yScales[i]);
                         canvasPlotArea(d);
                     });
                 };
@@ -129,12 +152,11 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
                 });
             } else {
                 const drawMultiSvgSeries = selection => {
-                    const svgPlotArea = chart.plotArea();
-                    svgPlotArea.xScale(xAxis.scale);
+                    if (altXScale) altXScale.range(xAxis.scale.range());
 
-                    const yScales = [yAxis.scale, y2Scale];
                     ySeriesDataJoin(selection, [data, altData]).each((d, i, nodes) => {
-                        svgPlotArea.yScale(yScales[i]);
+                        const svgPlotArea = plotAreas[i];
+                        svgPlotArea.xScale(xScales[i]).yScale(yScales[i]);
                         d3.select(nodes[i])
                             .datum(d)
                             .call(svgPlotArea);

@@ -9,7 +9,7 @@
 import * as fc from "d3fc";
 import {axisFactory} from "../axis/axisFactory";
 import {chartSvgFactory} from "../axis/chartFactory";
-import {axisSplitter} from "../axis/axisSplitter";
+import {axisSplitter, dataSplitFunction} from "../axis/axisSplitter";
 import {AXIS_TYPES} from "../axis/axisType";
 import {areaSeries} from "../series/areaSeries";
 import {seriesColors} from "../series/seriesColors";
@@ -23,14 +23,12 @@ import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 
 function areaChart(container, settings) {
-    const data = splitAndBaseData(settings, filterData(settings));
-
     const color = seriesColors(settings);
+    const {data, series, splitFn} = getDataAndSeries(settings, color);
+
     const legend = colorLegend()
         .settings(settings)
         .scale(color);
-
-    const series = fc.seriesSvgRepeat().series(areaSeries(settings, color).orient("vertical"));
 
     const xAxis = axisFactory(settings)
         .excludeType(AXIS_TYPES.linear)
@@ -45,7 +43,7 @@ function areaChart(container, settings) {
         .paddingStrategy(hardLimitZeroPadding());
 
     // Check whether we've split some values into a second y-axis
-    const splitter = axisSplitter(settings, data).color(color);
+    const splitter = axisSplitter(settings, data, splitFn).color(color);
 
     const yAxis1 = yAxisFactory(splitter.data());
 
@@ -90,3 +88,14 @@ areaChart.plugin = {
 };
 
 export default areaChart;
+
+const getData = settings => splitAndBaseData(settings, filterData(settings));
+const getSeries = (settings, color) => fc.seriesSvgRepeat().series(areaSeries(settings, color).orient("vertical"));
+
+export const getDataAndSeries = (settings, color) => {
+    return {
+        data: getData(settings),
+        series: getSeries(settings, color),
+        splitFn: dataSplitFunction
+    };
+};

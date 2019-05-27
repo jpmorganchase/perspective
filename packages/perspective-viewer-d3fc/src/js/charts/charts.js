@@ -7,6 +7,7 @@
  *
  */
 
+import multiChart from "./multi";
 import barChart from "./bar";
 import columnChart from "./column";
 import lineChart from "./line";
@@ -19,6 +20,6 @@ import candlestick from "./candlestick";
 import sunburst from "./sunburst";
 import treemap from "./treemap";
 
-const chartClasses = [barChart, columnChart, lineChart, areaChart, yScatter, xyScatter, heatmap, ohlc, candlestick, sunburst, treemap];
+const chartClasses = [multiChart, barChart, columnChart, lineChart, areaChart, yScatter, xyScatter, heatmap, ohlc, candlestick, sunburst, treemap];
 
 export default chartClasses;

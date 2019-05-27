@@ -103,7 +103,13 @@ class D3FCChartElement extends HTMLElement {
             if (areArraysEqualSimple(oldValues, newValues)) return {...oldSettings, data: newSettings.data, colorStyles: null};
         }
         this.remove();
-        return newSettings;
+
+        // Some settings can be preserved even when the chart schema changes
+        const preserved = oldSettings && {
+            multiTypes: oldSettings.multiTypes,
+            legend: oldSettings.legend && {left: oldSettings.legend.left, top: oldSettings.legend.top}
+        };
+        return {...preserved, ...newSettings};
     }
 }
 

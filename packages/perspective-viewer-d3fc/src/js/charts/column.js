@@ -10,8 +10,8 @@ import * as fc from "d3fc";
 import {axisFactory} from "../axis/axisFactory";
 import {chartSvgFactory} from "../axis/chartFactory";
 import domainMatchOrigins from "../axis/domainMatchOrigins";
-import {axisSplitter, dataBlankFunction, groupedBlankFunction} from "../axis/axisSplitter";
-import {AXIS_TYPES} from "../axis/axisType";
+import {axisSplitter, groupBlankFunction, multiGroupBlankFunction, groupRemoveFunction, multiGroupRemoveFunction} from "../axis/axisSplitter";
+import {axisType, AXIS_TYPES} from "../axis/axisType";
 import {barSeries} from "../series/barSeries";
 import {seriesColors} from "../series/seriesColors";
 import {groupAndStackData} from "../data/groupData";
@@ -22,23 +22,18 @@ import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 
 function columnChart(container, settings) {
-    const data = groupAndStackData(settings, filterData(settings));
     const color = seriesColors(settings);
+    const {data, series, splitFn, xScaleFn} = getDataAndSeries(settings, color);
 
     const legend = colorLegend()
         .settings(settings)
         .scale(color);
 
-    const bars = barSeries(settings, color).orient("vertical");
-    const series = fc
-        .seriesSvgMulti()
-        .mapping((data, index) => data[index])
-        .series(data.map(() => bars));
-
     const xAxis = axisFactory(settings)
         .excludeType(AXIS_TYPES.linear)
         .settingName("crossValues")
         .valueName("crossValue")(data);
+
     const yAxisFactory = axisFactory(settings)
         .settingName("mainValues")
         .valueName("mainValue")
@@ -48,8 +43,7 @@ function columnChart(container, settings) {
         .paddingStrategy(hardLimitZeroPadding());
 
     // Check whether we've split some values into a second y-axis
-    const blankFunction = settings.mainValues.length > 1 ? groupedBlankFunction : dataBlankFunction;
-    const splitter = axisSplitter(settings, data, blankFunction).color(color);
+    const splitter = axisSplitter(settings, data, splitFn).color(color);
 
     const yAxis1 = yAxisFactory(splitter.data());
 
@@ -60,11 +54,8 @@ function columnChart(container, settings) {
         .axisSplitter(splitter)
         .plotArea(plotSeries);
 
-    if (chart.xPaddingInner) {
-        chart.xPaddingInner(0.5);
-        chart.xPaddingOuter(0.25);
-        bars.align("left");
-    }
+    xScaleFn(xAxis.scale);
+
     chart.yNice && chart.yNice();
 
     const zoomChart = zoomableChart()
@@ -91,3 +82,40 @@ columnChart.plugin = {
 };
 
 export default columnChart;
+
+const getData = settings => groupAndStackData(settings, filterData(settings));
+const getSeries = (settings, data, color, options = {mixCharts: false}) => {
+    const bars = barSeries(settings, color, options).orient("vertical");
+
+    if (axisType(settings).excludeType(AXIS_TYPES.linear)() == AXIS_TYPES.ordinal) {
+        bars.align("left");
+    }
+
+    return fc
+        .seriesSvgMulti()
+        .mapping((data, index) => data[index])
+        .series(data.map(() => bars));
+};
+
+const getSplitFn = (settings, options) => {
+    const grouped = settings.mainValues.length > 1;
+    if (options.mixCharts) {
+        return grouped ? multiGroupRemoveFunction : groupRemoveFunction;
+    }
+    return grouped ? multiGroupBlankFunction : groupBlankFunction;
+};
+
+export const getDataAndSeries = (settings, color, symbols, options = {mixCharts: false}) => {
+    const data = getData(settings);
+    return {
+        data,
+        series: getSeries(settings, data, color, options),
+        splitFn: getSplitFn(settings, options),
+        xScaleFn: scale => {
+            if (scale.paddingInner) {
+                scale.paddingInner(0.5);
+                scale.paddingOuter(0.25);
+            }
+        }
+    };
+};

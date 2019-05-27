@@ -10,7 +10,7 @@ import * as fc from "d3fc";
 import {axisFactory} from "../axis/axisFactory";
 import {AXIS_TYPES} from "../axis/axisType";
 import {chartSvgFactory} from "../axis/chartFactory";
-import {axisSplitter} from "../axis/axisSplitter";
+import {axisSplitter, dataSplitFunction} from "../axis/axisSplitter";
 import {seriesColors} from "../series/seriesColors";
 import {lineSeries} from "../series/lineSeries";
 import {splitData} from "../data/splitData";
@@ -23,14 +23,12 @@ import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 
 function lineChart(container, settings) {
-    const data = splitData(settings, filterData(settings));
     const color = seriesColors(settings);
+    const {data, series, splitFn} = getDataAndSeries(settings, color);
 
     const legend = colorLegend()
         .settings(settings)
         .scale(color);
-
-    const series = fc.seriesSvgRepeat().series(lineSeries(settings, color).orient("vertical"));
 
     const paddingStrategy = hardLimitZeroPadding()
         .pad([0.1, 0.1])
@@ -48,7 +46,7 @@ function lineChart(container, settings) {
         .paddingStrategy(paddingStrategy);
 
     // Check whether we've split some values into a second y-axis
-    const splitter = axisSplitter(settings, data).color(color);
+    const splitter = axisSplitter(settings, data, splitFn).color(color);
 
     const yAxis1 = yAxisFactory(splitter.data());
 
@@ -93,3 +91,14 @@ lineChart.plugin = {
 };
 
 export default lineChart;
+
+const getData = settings => splitData(settings, filterData(settings));
+const getSeries = (settings, color) => fc.seriesSvgRepeat().series(lineSeries(settings, color).orient("vertical"));
+
+export const getDataAndSeries = (settings, color) => {
+    return {
+        data: getData(settings),
+        series: getSeries(settings, color),
+        splitFn: dataSplitFunction
+    };
+};

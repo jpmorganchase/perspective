@@ -10,7 +10,7 @@ import * as fc from "d3fc";
 import {axisFactory} from "../axis/axisFactory";
 import {AXIS_TYPES} from "../axis/axisType";
 import {chartSvgFactory} from "../axis/chartFactory";
-import {axisSplitter} from "../axis/axisSplitter";
+import {axisSplitter, dataSplitFunction} from "../axis/axisSplitter";
 import {seriesColors} from "../series/seriesColors";
 import {categoryPointSeries, symbolType} from "../series/categoryPointSeries";
 import {groupData} from "../data/groupData";
@@ -22,19 +22,14 @@ import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 
 function yScatter(container, settings) {
-    const data = groupData(settings, filterData(settings));
-    const symbols = symbolType(settings);
     const color = seriesColors(settings);
+    const symbols = symbolType(settings);
+    const {data, series, splitFn} = getDataAndSeries(settings, color, symbols);
 
     const legend = symbolLegend()
         .settings(settings)
         .scale(symbols)
         .color(color);
-
-    const series = fc
-        .seriesSvgMulti()
-        .mapping((data, index) => data[index])
-        .series(data.map(series => categoryPointSeries(settings, series.key, color, symbols)));
 
     const paddingStrategy = hardLimitZeroPadding()
         .pad([0.05, 0.05])
@@ -51,7 +46,7 @@ function yScatter(container, settings) {
         .paddingStrategy(paddingStrategy);
 
     // Check whether we've split some values into a second y-axis
-    const splitter = axisSplitter(settings, data).color(color);
+    const splitter = axisSplitter(settings, data, splitFn).color(color);
 
     const yAxis1 = yAxisFactory(splitter.data());
 
@@ -98,3 +93,19 @@ yScatter.plugin = {
 };
 
 export default yScatter;
+
+const getData = settings => groupData(settings, filterData(settings));
+const getSeries = (settings, data, color, symbols) =>
+    fc
+        .seriesSvgMulti()
+        .mapping((data, index) => data[index])
+        .series(data.map(series => categoryPointSeries(settings, series.key, color, symbols)));
+
+export const getDataAndSeries = (settings, color, symbols) => {
+    const data = getData(settings);
+    return {
+        data,
+        series: getSeries(settings, data, color, symbols),
+        splitFn: dataSplitFunction
+    };
+};

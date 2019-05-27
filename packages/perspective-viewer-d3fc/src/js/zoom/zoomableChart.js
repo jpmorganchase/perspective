@@ -15,7 +15,9 @@ export default () => {
     let chart = null;
     let settings = null;
     let xScale = null;
+    let altXScale = null;
     let xCopy = null;
+    let altXCopy = null;
     let yScale = null;
     let yCopy = null;
     let bound = false;
@@ -80,6 +82,7 @@ export default () => {
                     plotArea
                         .on("measure.zoom-range", () => {
                             if (xCopy) xCopy.range([0, d3.event.detail.width]);
+                            if (altXCopy) altXCopy.range([0, d3.event.detail.width]);
                             if (yCopy) yCopy.range([0, d3.event.detail.height]);
 
                             if (settings.zoom) {
@@ -120,6 +123,15 @@ export default () => {
         return zoomableChart;
     };
 
+    zoomableChart.altXScale = (...args) => {
+        if (!args.length) {
+            return xScale;
+        }
+        altXScale = args[0];
+        altXCopy = altXScale ? altXScale.copy() : null;
+        return zoomableChart;
+    };
+
     zoomableChart.yScale = (...args) => {
         if (!args.length) {
             return yScale;
@@ -154,6 +166,9 @@ export default () => {
         if (xScale) {
             xScale.domain(transform.rescaleX(xCopy).domain());
             changeArgs.xDomain = xScale.domain();
+        }
+        if (altXScale) {
+            altXScale.domain(transform.rescaleX(altXCopy).domain());
         }
 
         if (yScale) {
