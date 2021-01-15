@@ -7,6 +7,34 @@
  *
  */
 
+const get_wppp = () => {
+    // eslint-disable-next-line no-undef
+    return __webpack_public_path__;
+};
+
+const set_wppp = x => {
+    // eslint-disable-next-line no-undef
+    __webpack_public_path__ = x;
+};
+
+/**
+ * Executs a function `body()` within a scope with a modified
+ * `__webpack_public_path__` var, so that assets imported lazily are
+ * executed relative to their script, rather than the root script.
+ * Necessary if oyou expect webpack'd WASM assets to work when imported from
+ * e.g. a CDN.
+ * @param {Function} body The function to execute in a modified
+ * `__webpack_public_path__` scope.
+ */
+export function import_script_relative(body) {
+    const url = new URL(document.currentScript.src);
+    const old = get_wppp();
+    set_wppp(url.origin + url.pathname.replace(/\/(?:.(?!\/))+?$/, "/"));
+    const result = body();
+    set_wppp(old);
+    return result;
+}
+
 /**
  * Gets human-readable types for a column
  * @private

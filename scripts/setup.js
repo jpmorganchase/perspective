@@ -157,7 +157,7 @@ async function javascript_options() {
     }
 }
 
-async function python_options() {
+async function options() {
     const new_config = await inquirer.prompt([PROMPT_DEBUG, PROMPT_DOCKER]);
     CONFIG.add(new_config);
     CONFIG.write();
@@ -168,7 +168,7 @@ async function choose_project() {
         {
             type: "expand",
             name: "PSP_PROJECT",
-            message: "Focus (J)avascript or (P)ython?",
+            message: "Focus (J)avascript, (P)ython, or (R)ust?",
             default: CONFIG["PSP_PROJECT"] || "js",
             choices: [
                 {
@@ -178,8 +178,13 @@ async function choose_project() {
                 },
                 {
                     key: "p",
-                    name: "python",
+                    name: "Python",
                     value: "python"
+                },
+                {
+                    key: "r",
+                    name: "Rust",
+                    value: "rust"
                 }
             ]
         }
@@ -193,8 +198,9 @@ async function choose_project() {
             }
             break;
         case "python":
+        case "rust":
             {
-                await python_options();
+                await options();
             }
             break;
         default: {

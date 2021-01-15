@@ -18,7 +18,8 @@
         "packages/*",
         "examples/*",
         "docs",
-        "python/perspective"
+        "python/perspective",
+        "rust/perspective"
     ],
     "devDependencies": {
         "@babel/cli": "^7.8.4",
@@ -54,7 +55,7 @@
         "eslint-plugin-prettier": "^2.6.2",
         "file-loader": "^2.0.0",
         "fs-extra": "^8.1.0",
-        "graceful-fs": "https://github.com/mekwall/node-graceful-fs.git#patch-1",
+        "graceful-fs": "^4.2.4",
         "highcharts": "6.1.0",
         "html-loader": "^0.5.1",
         "html-loader-jest": "^0.2.1",
@@ -65,7 +66,7 @@
         "jsdoc": "3.5.5",
         "jsdoc-babel": "^0.5.0",
         "jsdoc-to-markdown": "^4.0.1",
-        "lerna": "^2.11.0",
+        "lerna": "^3.22.1",
         "less": "^3.9.0",
         "less-loader": "^4.1.0",
         "mini-css-extract-plugin": "^0.7.0",
@@ -129,6 +130,7 @@
         "fix:html": "html-beautify packages/**/src/html/*.html -r",
         "fix:json": "prettier --tab-width 4 --write **/package.json",
         "fix:python": "node scripts/lint_python.js --fix",
+        "fix:rust": "lerna run fix --scope=@finos/perspective-rust-internal",
         "fix": "npm-run-all --silent fix:*",
         "toggle_puppeteer": "node scripts/toggle_puppeteer.js",
         "version": "python3 python/perspective/scripts/write_version.py && git add python/perspective/perspective/core/_version.py"

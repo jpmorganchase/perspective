@@ -8,6 +8,7 @@
  */
 
 import {registerPlugin} from "@finos/perspective-viewer/dist/esm/utils.js";
+import {import_script_relative} from "@finos/perspective/dist/esm/utils.js";
 
 import "regular-table";
 import {createModel, configureRegularTable, formatters} from "regular-table/dist/examples/perspective.js";
@@ -17,6 +18,8 @@ import {configureRowSelectable, deselect} from "./row_selection.js";
 import {configureClick} from "./click.js";
 import {configureEditable} from "./editing.js";
 import {configureSortable} from "./sorting.js";
+
+const rust_module = import_script_relative(() => import("@finos/perspective-rust-internal"));
 
 const VIEWER_MAP = new WeakMap();
 const INSTALLED = new WeakMap();
@@ -42,6 +45,15 @@ function lock(body) {
 }
 
 const datagridPlugin = lock(async function(regular, viewer, view) {
+    // Example - how to call rust:
+    if (window.EXPERIMENTAL_DO_SUPERFLOUS_ARROW_CALL) {
+        const {accessor_make, accessor_get_data} = await rust_module;
+        const arrow = await view.to_arrow();
+        const accessor = accessor_make(arrow);
+        const data = accessor_get_data(accessor);
+        console.log(data);
+    }
+
     const is_installed = INSTALLED.has(regular);
     const table = viewer.table;
     let model;

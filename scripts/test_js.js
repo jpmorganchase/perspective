@@ -68,33 +68,37 @@ function get_regex() {
 }
 
 try {
-    if (!IS_PUPPETEER && !IS_LOCAL_PUPPETEER) {
-        if (IS_DOCKER && !IS_EMSDK) {
-            execute(emsdk());
-        } else {
-            execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
-            execute`node_modules/.bin/lerna run test:build --stream
+    if (PACKAGE === "perspective-rust-internal" || !PACKAGE) {
+        execute(`lerna exec --scope=@finos/perspective-rust-internal -- yarn test:rust`);
+    }
+    if (PACKAGE !== "perspective-rust-internal" || !PACKAGE) {
+        if (!IS_PUPPETEER && !IS_LOCAL_PUPPETEER) {
+            if (IS_DOCKER && !IS_EMSDK) {
+                execute(emsdk());
+            } else {
+                execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
+                execute`node_modules/.bin/lerna run test:build --stream
                 --scope="@finos/${PACKAGE}"`;
-        }
-        if (!IS_EMSDK) {
-            execute`yarn --silent clean --screenshots`;
-            execute`${docker("puppeteer")} node scripts/test_js.js
+            }
+            if (!IS_EMSDK) {
+                execute`yarn --silent clean --screenshots`;
+                execute`${docker("puppeteer")} node scripts/test_js.js
                 --private-puppeteer ${getarg()}`;
-        }
-    } else {
-        if (IS_LOCAL_PUPPETEER) {
-            execute`yarn --silent clean --screenshots`;
-            execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
-            execute`node_modules/.bin/lerna run test:build --stream
+            }
+        } else {
+            if (IS_LOCAL_PUPPETEER) {
+                execute`yarn --silent clean --screenshots`;
+                execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
+                execute`node_modules/.bin/lerna run test:build --stream
                 --scope="@finos/${PACKAGE}"`;
-        }
-        if (getarg("--quiet")) {
-            console.log("-- Running test suite in quiet mode");
-            execute(silent(jest()));
-        } else if (process.env.PACKAGE) {
-            const debug = getarg("--debug") ? "" : "--silent";
-            console.log("-- Running test suite in individual mode");
-            execute`
+            }
+            if (getarg("--quiet")) {
+                console.log("-- Running test suite in quiet mode");
+                execute(silent(jest()));
+            } else if (process.env.PACKAGE) {
+                const debug = getarg("--debug") ? "" : "--silent";
+                console.log("-- Running test suite in individual mode");
+                execute`
                 PSP_SATURATE=${!!getarg("--saturate")}
                 PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}
                 WRITE_TESTS=${IS_WRITE}
@@ -108,9 +112,10 @@ try {
                 ${debug}
                 ${getarg("--interactive") && "--runInBand"}
                 --testNamePattern="${get_regex()}"`;
-        } else {
-            console.log("-- Running test suite in fast mode");
-            execute(jest());
+            } else {
+                console.log("-- Running test suite in fast mode");
+                execute(jest());
+            }
         }
     }
 } catch (e) {

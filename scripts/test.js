@@ -18,6 +18,8 @@ if (!fs.existsSync("./.perspectiverc")) {
     require("./test_js");
 } else if (process.env.PSP_PROJECT === "python") {
     require("./test_python");
+} else if (process.env.PSP_PROJECT === "rust") {
+    require("./test_rust");
 } else if (process.env.PSP_PROJECT === "cpp") {
     require("./test_cpp");
 } else if (process.env.PSP_PROJECT === "") {

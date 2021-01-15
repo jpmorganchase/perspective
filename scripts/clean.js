@@ -30,6 +30,7 @@ try {
     if (!process.env.PSP_PROJECT || args.indexOf("--deps") > -1) {
         clean`packages/perspective/build`;
     }
+
     if (process.env.PSP_PROJECT === "python") {
         clean(
             "python/perspective/dist",
@@ -45,6 +46,12 @@ try {
         );
         return;
     }
+
+    if (process.env.PSP_PROJECT === "rust") {
+        clean("rust/perspective/arrow_accessor/target", "rust/perspective/arrow_accessor/pkg");
+        return;
+    }
+
     if (!IS_SCREENSHOTS && (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE))) {
         clean`cpp/perspective/cppbuild`;
         const files = ["CMakeFiles", "build", "cmake_install.cmake", "CMakeCache.txt", "compile_commands.json", "libpsp.a", "Makefile"];

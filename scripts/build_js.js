@@ -11,7 +11,6 @@ const fs = require("fs");
 const path = require("path");
 const mkdirp = require("mkdirp");
 const prettier = require("prettier");
-const execSync = require("child_process").execSync;
 const argv = require("minimist")(process.argv.slice(2));
 const minimatch = require("minimatch");
 const os = require("os");
@@ -120,6 +119,7 @@ try {
         compileCPP("perspective");
         RUNTIMES.map(compileRuntime);
     }
+
     lerna();
 } catch (e) {
     console.log(e.message);

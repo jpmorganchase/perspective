@@ -1,0 +1,15 @@
+{
+    "private": true,
+    "name": "@finos/perspective-rust-internal",
+    "version": "0.6.0",
+    "main": "./pkg/perspective.js",
+    "scripts": {
+        "build": "wasm-pack build -- --color=always",
+        "lint": "cargo fmt -- --check",
+        "fix": "cargo fmt",
+        "test": "yarn test:rust",
+        "test:rust": "wasm-pack test --node -- --color=always",
+        "test:run": ":",
+        "test:build": ":"
+    }
+}

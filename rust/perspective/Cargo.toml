@@ -1,0 +1,38 @@
+[package]
+name = "perspective"
+version = "0.6.0"
+description = "A module that allows arrow binaries to be read out into Javascript as a 2-dimensional array of columnar data."
+authors = ["The Perspective Authors"]
+edition = "2018"
+repository = "https://github.com/finos/perspective"
+license = "Apache-2.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["console_error_panic_hook"]
+
+[dependencies]
+wasm-bindgen = "^0.2.63"
+js-sys = "0.3.45"
+chrono = "0.4.19"
+
+# The `console_error_panic_hook` crate provides better debugging of panics by
+# logging them with `console.error`. This is great for development, but requires
+# all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
+# code size when deploying.
+console_error_panic_hook = { version = "0.1.6", optional = true }
+
+[dependencies.arrow]
+git = "https://github.com/apache/arrow"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.13"
+
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-O3", "--enable-mutable-globals"]

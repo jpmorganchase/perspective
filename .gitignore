@@ -150,6 +150,15 @@ docs/static/arrow/
 *.pyc
 __pycache__/
 
+# Rust
+Cargo.lock
+rust/perspective/*/target
+rust/perspective/*/bin
+rust/perspective/*/pkg
+rust/perspective/**/*.rs.bk
+rust/perspective/*/wasm-pack.log
+
+
 # Copied C++ source folders
 python/perspective/cmake
 python/perspective/src
@@ -169,3 +178,4 @@ junit.xml
 python/perspective/python_junit.xml
 python/perspective/coverage.xml
 python/perspective/bench/stresstest/results
+rust/perspective/target

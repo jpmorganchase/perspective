@@ -45,6 +45,7 @@
     },
     "devDependencies": {
         "@finos/perspective-test": "^0.6.0",
-        "@finos/perspective-webpack-plugin": "^0.6.0"
+        "@finos/perspective-webpack-plugin": "^0.6.0",
+        "@finos/perspective-rust-internal": "^0.6.0"
     }
 }

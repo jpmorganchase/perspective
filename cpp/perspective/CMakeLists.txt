@@ -115,10 +115,12 @@ endif()
 
 if(DEFINED ENV{PSP_DEBUG})
 	set(CMAKE_BUILD_TYPE DEBUG)
+	set(CARGO_RELEASE_FLAG "")
 else()
 	if (NOT DEFINED CMAKE_BUILD_TYPE)
 		set(CMAKE_BUILD_TYPE RELEASE)
 	endif()
+	set(CARGO_RELEASE_FLAG "--release")
 endif()
 
 if(DEFINED ENV{PSP_MANYLINUX})
@@ -204,6 +206,8 @@ if (PSP_WASM_BUILD)
 	####################
 	# EMSCRIPTEN BUILD #
 	####################
+
+	# Use Emscripten provided compiler toolchain
 	execute_process(COMMAND which emcc OUTPUT_VARIABLE EMCC)
 	execute_process(COMMAND which em++ OUTPUT_VARIABLE EMPP)
 	string(STRIP ${EMCC} EMCC)
