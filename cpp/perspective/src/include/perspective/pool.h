@@ -17,6 +17,7 @@
 
 #ifdef PSP_ENABLE_PYTHON
 #include <thread>
+#include <boost/thread/shared_mutex.hpp>
 #endif
 
 #if defined PSP_ENABLE_WASM
@@ -64,6 +65,7 @@ public:
 #ifdef PSP_ENABLE_PYTHON
     void set_event_loop();
     std::thread::id get_event_loop_thread_id() const;
+    boost::shared_mutex* get_lock() const;
 #endif
 
     /**
@@ -113,6 +115,7 @@ protected:
 private:
 #ifdef PSP_ENABLE_PYTHON
     std::thread::id m_event_loop_thread_id;
+    boost::shared_mutex* m_lock;
 #endif
     std::mutex m_mtx;
     std::vector<t_gnode*> m_gnodes;

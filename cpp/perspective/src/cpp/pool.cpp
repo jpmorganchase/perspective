@@ -51,6 +51,7 @@ empty_callback() {
 t_pool::t_pool()
     : m_update_delegate(empty_callback())
     , m_event_loop_thread_id(std::thread::id())
+    , m_lock(new boost::shared_mutex())
     , m_sleep(0) {
         m_run.clear();
     }
@@ -64,7 +65,11 @@ t_pool::t_pool()
 
 #endif
 
-t_pool::~t_pool() {}
+t_pool::~t_pool() {
+#ifdef PSP_ENABLE_PYTHON
+    delete m_lock;
+#endif
+}
 
 void
 t_pool::init() {
@@ -88,6 +93,7 @@ t_pool::register_gnode(t_gnode* node) {
     node->set_pool_cleanup([this, id]() { this->m_gnodes[id] = 0; });
 #ifdef PSP_ENABLE_PYTHON
     if (m_event_loop_thread_id != std::thread::id()) {
+        node->set_lock(m_lock);
         node->set_event_loop_thread_id(m_event_loop_thread_id);
     }
 #endif
@@ -137,7 +143,12 @@ void t_pool::set_event_loop() {
     m_event_loop_thread_id = std::this_thread::get_id();
     for (auto node : m_gnodes) {
         node->set_event_loop_thread_id(m_event_loop_thread_id);
+        node->set_lock(m_lock);
     }
+}
+
+boost::shared_mutex* t_pool::get_lock() const {
+    return m_lock;
 }
 
 std::thread::id t_pool::get_event_loop_thread_id() const {

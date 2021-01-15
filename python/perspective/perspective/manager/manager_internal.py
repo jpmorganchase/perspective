@@ -139,6 +139,7 @@ class _PerspectiveManagerInternal(object):
                 new_view = self._tables[msg["table_name"]].view(**msg.get("config", {}))
                 new_view._client_id = client_id
                 self._views[msg["view_name"]] = new_view
+                post_callback(json.dumps({"id": msg["id"]}))
             elif cmd == "table_method" or cmd == "view_method":
                 self._process_method_call(msg, post_callback, client_id)
         except (PerspectiveError, PerspectiveCppError) as error:

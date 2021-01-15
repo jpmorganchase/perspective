@@ -315,7 +315,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 	endif()
 
-	find_package(Boost REQUIRED)
+	find_package(Boost COMPONENTS thread system REQUIRED)
 	if(NOT Boost_FOUND)
 		message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
 	else()
@@ -655,8 +655,11 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		target_link_libraries(psp ${PYTHON_PYARROW_LIBRARIES})
 		target_link_libraries(binding ${PYTHON_PYARROW_LIBRARIES})
 
+		target_link_libraries(psp Boost::thread)
+		target_link_libraries(binding Boost::thread)
+
 		target_link_libraries(psp tbb)
-		target_link_libraries(binding tbb)
+		target_link_libraries(binding tbb)		
 
 		target_link_libraries(binding psp)
 

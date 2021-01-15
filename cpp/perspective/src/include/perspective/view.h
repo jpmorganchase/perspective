@@ -230,6 +230,7 @@ public:
     bool is_column_only() const;
 #ifdef PSP_ENABLE_PYTHON
     std::thread::id get_event_loop_thread_id() const;
+    boost::shared_mutex* get_lock() const;
 #endif
 
 private:

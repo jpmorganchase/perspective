@@ -720,6 +720,11 @@ class PerspectiveViewer extends ActionElement {
         }
     }
 
+    async swap(table) {
+        this._table = table;
+        await this._debounce_update();
+    }
+
     /**
      * Reset's this element's view state and attributes to default.  Does not
      * delete this element's `perspective.table` or otherwise modify the data

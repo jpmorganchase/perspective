@@ -135,6 +135,9 @@ export class Server {
                         }
                     }
                 }
+                this.post({
+                    id: msg.id
+                });
                 break;
         }
     }

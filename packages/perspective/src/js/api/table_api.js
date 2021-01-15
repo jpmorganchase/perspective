@@ -76,7 +76,9 @@ proxy_table.prototype = table.prototype;
 
 // Dispatch table methods that create new objects to the worker
 table.prototype.view = function(config) {
-    return new view(this._worker, this._name, config);
+    return new Promise((resolve, reject) => {
+        const v = new view(this._worker, this._name, config, () => resolve(v), reject);
+    });
 };
 
 // Dispatch table methods that do not create new objects (getters, setters etc.)

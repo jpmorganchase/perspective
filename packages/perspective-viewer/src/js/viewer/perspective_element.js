@@ -494,7 +494,7 @@ export class PerspectiveElement extends StateElement {
         }
 
         try {
-            this._view = this._table.view(config);
+            this._view = await this._table.view(config);
             this._view_updater = () => this._view_on_update(limit_points);
             this._view.on_update(this._view_updater);
         } catch (e) {

@@ -25,14 +25,19 @@
 #include <perspective/computed_column_map.h>
 #include <perspective/computed_function.h>
 #include <tsl/ordered_map.h>
+#include <chrono>
+
 #ifdef PSP_ENABLE_PYTHON
 #include <thread>
+#include <boost/thread/shared_mutex.hpp>
 #endif
+
 #ifdef PSP_PARALLEL_FOR
 #include <tbb/parallel_sort.h>
 #include <tbb/tbb.h>
 #endif
-#include <chrono>
+
+
 
 namespace perspective {
 
@@ -197,6 +202,7 @@ public:
 
 #ifdef PSP_ENABLE_PYTHON
     void set_event_loop_thread_id(std::thread::id id);
+    void set_lock(boost::shared_mutex* lock);
 #endif
 
 protected:
@@ -402,6 +408,7 @@ private:
 
 #ifdef PSP_ENABLE_PYTHON
     std::thread::id m_event_loop_thread_id;
+    boost::shared_mutex* m_lock;
 #endif
 };
 

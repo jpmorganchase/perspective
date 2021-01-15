@@ -46,6 +46,10 @@ calc_negate(t_tscalar val) {
 
 t_gnode::t_gnode(const t_schema& input_schema, const t_schema& output_schema)
     : m_mode(NODE_PROCESSING_SIMPLE_DATAFLOW)
+#ifdef PSP_ENABLE_PYTHON
+    , m_event_loop_thread_id(std::thread::id())
+    , m_lock(nullptr)
+#endif
     , m_gnode_type(GNODE_TYPE_PKEYED)
     , m_input_schema(input_schema)
     , m_output_schema(output_schema)
@@ -600,7 +604,7 @@ t_gnode::process(t_uindex port_id) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "Cannot `process` on an uninited gnode.");
 #ifdef PSP_ENABLE_PYTHON
-    PerspectiveScopedGILRelease acquire(m_event_loop_thread_id);
+    PerspectiveScopedGILRelease acquire(m_event_loop_thread_id, m_lock, false);
 #endif
 
     t_process_table_result result = _process_table(port_id);
@@ -1395,6 +1399,11 @@ t_gnode::repr() const {
 void 
 t_gnode::set_event_loop_thread_id(std::thread::id id) {
     m_event_loop_thread_id = id;
+}
+
+void
+t_gnode::set_lock(boost::shared_mutex* lock) {
+    m_lock = lock;
 }
 #endif
 

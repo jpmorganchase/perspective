@@ -22,12 +22,14 @@
     <link rel='stylesheet' href="http://localhost:8080/node_modules/perspective-viewer/dist/umd/material-dense.css">
 
     <style>
-        perspective-viewer{position:absolute;top:0;left:0;right:0;bottom:0;}
+        perspective-viewer{position:absolute;top:50px;left:0;right:0;bottom:0;}
+        #state {padding:12px; font-family:"Open Sans";font-size:16px;}
     </style>
 
 </head>
 
 <body>
+    <div id="state">none</div>
     <perspective-viewer 
         id="viewer">
     
@@ -44,56 +46,31 @@
              * Use `perspective.websocket` to set up Perspective in server or
              * distributed modes.
              */
+            window.state.innerText = "Connecting ...";
             const websocket = perspective.websocket("ws://localhost:8080/websocket");
-
-            /**
-             * This shows Perspective running in "distributed mode": a `Table`
-             * is present on the Python server AND in the browser client, and
-             * state is automatically synchronized between the two.
-             * 
-             * To create a Perspective client running in "distributed mode",
-             * host a `Table` in the Python server, create a `Table` on the
-             * client through a `View` on the server. This synchronizes the
-             * server's `Table` with the client's `Table`.
-             */
+            const websocket2 = perspective.websocket("ws://localhost:8080/websocket");
             const worker = perspective.worker();
 
-            /**
-             * `server_table` is a proxy to the hosted `Table` in the Python
-             * server. All public API methods are available through this
-             * proxied table.
-             */
-            const server_table = websocket.open_table("data_source_one");
-
-            /**
-             * Create a `View` on the server.
-             */
-            const server_view = server_table.view();
-
-            /**
-             * When a `View` is passed into `table()` to create a new `Table`,
-             * it automatically sets up an `on_update` callback to synchronize
-             * the state of the server and client.
-             * 
-             * `const table` is a local Perspective `Table` that runs in
-             * WebAssembly, with its state kept in sync through the WebSocket
-             * connection. If the WebSocket connection closes/times out, the
-             * `Table` and its data (and associated viewer) are still fully
-             * functional, but will not be kept up-to-date with server state.
-             * 
-             * Use `table.get_index()` in order to create a `Table` on the
-             * client that has the exact same settings as the server.
-             * 
-             * For a more complex example of manually controlling state
-             * synchronization between server and client, see
-             * `client_server_editing.html`.
-             */
-            const table = worker.table(server_view, {
-                index: await server_table.get_index()
+            window.state.innerText = "Loading ...";
+            const table = websocket.open_table('data_source_one')
+            table.view().then(view => {
+                view.to_arrow().then(async x => {
+                    window.state.innerText = "Creating local table ...";
+                    const table = worker.table(x);
+                    await table.size();
+                    window.state.innerText = "Loading locally ...";
+                    await document.getElementById('viewer').swap(table);
+                    window.state.innerText = "Local";
+                });
             });
+
+
+          //  const table = worker.table(view);
             
             // Load the local table in the `<perspective-viewer>`.
-            document.getElementById('viewer').load(table);
+
+            await document.getElementById('viewer').load(websocket2.open_table('data_source_one'));
+            window.state.innerText = "Server";
         });
 
     </script>

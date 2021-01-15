@@ -18,7 +18,7 @@ import {bindall} from "../utils.js";
  * @param {*} table_name
  * @param {*} config
  */
-export function view(worker, table_name, config) {
+export function view(worker, table_name, config, resolve, reject) {
     this._worker = worker;
     //this._config = config;
     this._name = Math.random() + "";
@@ -28,7 +28,7 @@ export function view(worker, table_name, config) {
         table_name: table_name,
         config: config
     };
-    this._worker.post(msg);
+    this._worker.post(msg, resolve, reject);
     bindall(this);
 }
 

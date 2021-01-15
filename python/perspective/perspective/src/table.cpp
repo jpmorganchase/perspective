@@ -63,7 +63,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
         ptr = malloc(size);
         std::memcpy(ptr, bytes.cast<std::string>().c_str(), size);
         {
-            PerspectiveScopedGILRelease acquire(pool->get_event_loop_thread_id());
+            PerspectiveScopedGILRelease acquire(pool->get_event_loop_thread_id(), pool->get_lock(), true);
         
             arrow_loader.initialize((uintptr_t)ptr, size);
 
@@ -180,7 +180,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
     data_table.init();
     std::uint32_t row_count;
     if (is_arrow) {
-        PerspectiveScopedGILRelease acquire(pool->get_event_loop_thread_id());
+        PerspectiveScopedGILRelease acquire(pool->get_event_loop_thread_id(), pool->get_lock(), true);
         row_count = arrow_loader.row_count();
         data_table.extend(arrow_loader.row_count());
         arrow_loader.fill_table(data_table, input_schema, index, offset, limit, is_update);
