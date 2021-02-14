@@ -1,0 +1,155 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2018, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "~@finos/perspective-workspace/dist/theme/material.less";
+@import "./overlabels.less";
+
+body {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #eee;
+}
+
+perspective-workspace {
+    left: 360px;
+    right: 12px;
+    bottom: 12px;
+    top: 40px;
+    height: auto;
+    width: auto;
+    position: absolute;
+    --master--background-color: #eee;
+
+    .workspace-master-widget {
+        margin-top:8px;
+        margin-bottom: 24px;
+    }
+}
+
+#ticket {
+    display:flex;
+    flex-direction: column;
+    font-family: "Open Sans";
+    font-size: 12px;
+    padding: 24px;
+    height: 100%;
+    width: 360px;
+
+    #controls {
+        flex: 0;
+        display: grid;
+        grid-template-columns: auto auto auto;
+        grid-template-rows: auto;
+        grid-template-areas: 
+            "side px qty"
+            "execute execute execute";
+        padding-left: 40px;
+        padding-right: 20px;
+        
+
+        & > * {
+            margin-right: 12px;
+            margin-bottom: 12px;
+        }
+
+        // Enable/disable on security select
+        opacity: 0.3;
+        pointer-events: none;        
+        &.enabled {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #qty-container {
+            grid-area: qty;
+        }
+
+        #side {
+            grid-area: side;
+        }
+
+        #px-container {
+            grid-area: px;
+        }
+
+        #execute {
+            grid-area: execute;
+            height: 36px;
+            pointer-events: none;
+            color: #aaa;
+            &.enabled {
+                color: #000;
+                pointer-events: auto;
+            }
+        }
+
+        // Ticket input overlays
+        #qty:before, #px:before {
+            content: "";
+        }
+
+        #qty:empty:before {
+            content: "Quantity";
+        }
+
+        #px:empty:before {
+            content: "Price";
+        }
+    }
+}
+
+perspective-viewer#ticket-market {
+    width: 100%;
+    height: 180px;
+    margin-left: -12px;
+    flex: 0;
+    --plugin--background: #eee;
+    --settings-button--content: "";
+    --settings-button--padding: 0;
+    regular-table {
+        overflow:hidden;
+        .psp-row-selected {
+            color: white !important;
+        }
+        tbody tr:first-child {
+            display: none;
+        }
+    }
+}
+
+
+perspective-viewer#ticket-portfolio {
+    width: 100%;
+    height: 200px;
+    margin-left: -12px;
+    flex: 0;
+    margin-top: 36px;
+    --plugin--background: #eee;
+    --settings-button--content: "";
+    --settings-button--padding: 0;
+}
+
+
+perspective-viewer#ticket-orders {
+    width: 100%;
+    height: 200px;
+    margin-left: -12px;
+    flex: 1;
+    --plugin--background: #eee;
+    --settings-button--content: "";
+    --settings-button--padding: 0;
+}

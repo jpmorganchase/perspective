@@ -104,6 +104,12 @@ class View(object):
         self._delete_callbacks = _PerspectiveCallBackCache()
         self._client_id = None
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.delete()
+
     def get_config(self):
         """Returns a copy of the immutable configuration ``kwargs`` from which
         this :class:`~perspective.View` was instantiated.

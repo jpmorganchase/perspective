@@ -28,11 +28,11 @@
     }
 
     div.p-SplitPanel-handle {
-        background-color: var(--master-divider--background-color);
+        background-color: var(--master-divider--background-color, var(--master--background-color, rgb(47, 49, 54)));
     }
 
     .master-panel {
-        background-color: rgb(47, 49, 54);
+        background-color: var(--master--background-color, rgb(47, 49, 54));
     }
 
     .perspective-workspace.context-menu * .p-SplitPanel-handle {

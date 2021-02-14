@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tontine</title>
+</head>
+
+<body>
+    <div id="ticket" style="display:none;">
+        <perspective-viewer id="ticket-market" selectable></perspective-viewer>
+        <div id="controls">
+            <button id="side">BUY</button>
+            <div id="px-container" class="ticket-input">
+                <input type="number" id="px" placeholder="Price" autocomplete="off">
+                <label for="px">Price</label>
+            </div>
+            <div id="qty-container" class="ticket-input">
+                <input type="number" id="qty" placeholder="Quantity" autocomplete="off">
+                <label for="qty">Quantity</label>
+            </div>
+            <button id="execute">Execute</button>
+        </div>
+        <perspective-viewer id="ticket-portfolio"></perspective-viewer>
+        <perspective-viewer id="ticket-orders"></perspective-viewer>
+    </div>
+    <div id="layout-toolbar"></div>
+    <perspective-workspace id="workspace" side="right"></perspective-workspace>
+   
+</body>
+
+</html>

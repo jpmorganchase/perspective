@@ -1,0 +1,192 @@
+{
+  "sizes": [
+    1
+  ],
+  "detail": {
+    "main": {
+      "type": "split-area",
+      "orientation": "vertical",
+      "children": [
+        {
+          "type": "split-area",
+          "orientation": "horizontal",
+          "children": [
+            {
+              "type": "tab-area",
+              "widgets": [
+                "PERSPECTIVE_GENERATED_ID_0"
+              ],
+              "currentIndex": 0
+            },
+            {
+              "type": "tab-area",
+              "widgets": [
+                "PERSPECTIVE_GENERATED_ID_2"
+              ],
+              "currentIndex": 0
+            }
+          ],
+          "sizes": [
+            0.5,
+            0.5
+          ]
+        },
+        {
+          "type": "tab-area",
+          "widgets": [
+            "PERSPECTIVE_GENERATED_ID_4",
+            "PERSPECTIVE_GENERATED_ID_9"
+          ],
+          "currentIndex": 0
+        }
+      ],
+      "sizes": [
+        0.5856714260761271,
+        0.4143285739238729
+      ]
+    }
+  },
+  "mode": "globalFilters",
+  "viewers": {
+    "PERSPECTIVE_GENERATED_ID_0": {
+      "plugin": "datagrid",
+      "row-pivots": [
+        "px"
+      ],
+      "column-pivots": [
+        "side"
+      ],
+      "aggregates": {
+        "px": "dominant",
+        "player": "last",
+        "time": "last"
+      },
+      "filters": [
+        [
+          "status",
+          "==",
+          "OPEN"
+        ]
+      ],
+      "sort": [
+        [
+          "px",
+          "desc"
+        ],
+        [
+          "side",
+          "col desc"
+        ]
+      ],
+      "columns": [
+        "px",
+        "qty",
+        "player"
+      ],
+      "selectable": null,
+      "computed-columns": null,
+      "master": false,
+      "name": "Orders (duplicate)",
+      "table": "orders",
+      "linked": false
+    },
+    "PERSPECTIVE_GENERATED_ID_2": {
+      "plugin": "d3_x_bar",
+      "row-pivots": [
+        "px"
+      ],
+      "column-pivots": [
+        "side"
+      ],
+      "filters": [
+        [
+          "status",
+          "==",
+          "OPEN"
+        ]
+      ],
+      "sort": [
+        [
+          "px",
+          "desc"
+        ]
+      ],
+      "columns": [
+        "qty"
+      ],
+      "selectable": null,
+      "computed-columns": null,
+      "aggregates": null,
+      "plugin_config": {
+        "realValues": [
+          "qty"
+        ]
+      },
+      "master": false,
+      "name": "Orders",
+      "table": "orders",
+      "linked": false
+    },
+    "PERSPECTIVE_GENERATED_ID_4": {
+      "plugin": "d3_y_line",
+      "row-pivots": [
+        "time"
+      ],
+      "columns": [
+        "px"
+      ],
+      "column-pivots": [
+        "symbol"
+      ],
+      "aggregates": {
+        "px": "avg"
+      },
+      "selectable": null,
+      "computed-columns": null,
+      "filters": null,
+      "sort": null,
+      "plugin_config": {
+        "realValues": [
+          "px"
+        ]
+      },
+      "master": false,
+      "name": "Market",
+      "table": "market",
+      "linked": false
+    },
+    "PERSPECTIVE_GENERATED_ID_9": {
+      "plugin": "datagrid",
+      "columns": [
+        "player",
+        "notional",
+        "qty",
+        "symbol",
+        "time",
+        "id"
+      ],
+      "sort": [
+        [
+          "time",
+          "desc"
+        ]
+      ],
+      "filters": [
+        [
+          "notional",
+          "<",
+          0
+        ]
+      ],
+      "selectable": null,
+      "computed-columns": null,
+      "row-pivots": null,
+      "column-pivots": null,
+      "aggregates": null,
+      "master": false,
+      "name": "Transactions",
+      "table": "tx",
+      "linked": false
+    }
+  }
+}

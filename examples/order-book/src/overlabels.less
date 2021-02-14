@@ -1,0 +1,49 @@
+.ticket-input {
+    position: relative;
+}
+
+.ticket-input input {
+    display: block;
+    line-height: 2em;
+    margin: 0;
+    padding-left: 10px;
+    width: 100%;
+    font-size: medium;
+    border: 1px solid #f4f4f4;
+    background-color: #f4f4f4;
+    border-radius: 5px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    font-weight: 500;
+}
+
+.ticket-input input:focus {
+    border: 1px solid #2c7ac9;
+    outline: none;
+}
+
+.ticket-input label {
+    display: block;
+    position: absolute;
+    opacity: 0;
+    bottom: 1.9rem;
+    color: #5d5d5d;
+    transition: 0.2s ease-in-out transform;
+    font-size: 12px;
+}
+
+.ticket-input input:placeholder-shown+label {
+    visibility: hidden;
+    z-index: -1;
+    transition: 0.2s ease-in-out;
+}
+
+.ticket-input input:not(:placeholder-shown)+label,
+.ticket-input input:focus:not(:placeholder-shown)+label {
+    visibility: visible;
+    z-index: 1;
+    opacity: 1;
+    transform: translateY(-10px);
+    transition: 0.2s ease-in-out transform;
+}
