@@ -11,8 +11,7 @@ const {execute, docker, clean, resolve, getarg, bash, python_image} = require(".
 const fs = require("fs-extra");
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_MACOS = getarg("--macos");
-const IS_PY2 = getarg("--python2");
-const PYTHON = IS_PY2 ? "python2" : getarg("--python38") ? "python3.8" : getarg("--python36") ? "python3.6" : "python3.7";
+const PYTHON = getarg("--python39") ? "python3.9" : getarg("--python38") ? "python3.8" : getarg("--python36") ? "python3.6" : "python3.7";
 
 let IMAGE = "manylinux2014";
 let MANYLINUX_VERSION;
@@ -20,10 +19,10 @@ let MANYLINUX_VERSION;
 if (IS_DOCKER) {
     // defaults to 2010
     MANYLINUX_VERSION = "manylinux2010";
-    if (!IS_PY2) {
-        // switch to 2014 only on python3
-        MANYLINUX_VERSION = getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "manylinux2014";
-    }
+
+    // switch to 2014 only on python3
+    MANYLINUX_VERSION = getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "manylinux2014";
+
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }
 
@@ -49,14 +48,7 @@ try {
     fs.copySync(cmake, dcmake, {preserveTimestamps: true});
     clean(obj);
 
-    let cmd;
-
-    if (IS_PY2) {
-        // shutil_which is required in setup.py
-        cmd = bash`${PYTHON} -m pip install backports.shutil_which && `;
-    } else {
-        cmd = bash``;
-    }
+    let cmd = bash``;
 
     // Create a wheel
     if (MANYLINUX_VERSION) {
@@ -77,10 +69,6 @@ try {
         // Use auditwheel on Linux - repaired wheels are in
         // `python/perspective/wheelhouse`.
         let PYTHON_INTERPRETER = PYTHON;
-        if (IS_PY2) {
-            // Run auditwheel on python 3 against a python 2 wheel
-            PYTHON_INTERPRETER = "python3.7";
-        }
         cmd += `&& ${PYTHON_INTERPRETER} -m auditwheel -v show ./dist/*.whl && ${PYTHON_INTERPRETER} -m auditwheel -v repair -L .lib ./dist/*.whl`;
     } else if (IS_MACOS) {
         // Don't need to do any cleaning here since we will reuse the cmake

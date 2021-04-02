@@ -21,14 +21,12 @@ RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
 RUN ln -s /opt/cmake/bin/ctest /usr/local/bin/ctest
 
 # Remove auditwheel for reinstall
-RUN rm -rf /opt/python/cp27-cp27m/bin/auditwheel
 RUN rm -rf /opt/python/cp36-cp36m/bin/auditwheel
 RUN rm -rf /opt/python/cp37-cp37m/bin/auditwheel
 RUN rm -rf /opt/python/cp38-cp38/bin/auditwheel
 
 
 # Copy assets
-RUN cp -arf /opt/python/cp27-cp27m/* /usr/local/
 RUN cp -arf /opt/python/cp36-cp36m/* /usr/local/
 RUN cp -arf /opt/python/cp37-cp37m/* /usr/local/
 RUN cp -arf /opt/python/cp38-cp38/* /usr/local/
@@ -36,12 +34,11 @@ RUN cp -arf /opt/python/cp38-cp38/* /usr/local/
 ENV PATH=/usr/local/bin:$PATH
 
 # Install dependencies
-RUN python2.7 -m pip install numpy scipy pybind11 cython codecov mock pytest pytest-cov traitlets ipywidgets faker psutil
 RUN python3.6 -m pip install numpy scipy pybind11 cython codecov mock black>=20 flake8-black pytest pytest-cov traitlets ipywidgets faker psutil
 RUN python3.7 -m pip install numpy scipy pybind11 cython codecov mock black>=20 flake8-black pytest pytest-cov traitlets ipywidgets faker psutil
 RUN python3.8 -m pip install numpy scipy pybind11 cython codecov mock black>=20 flake8-black pytest pytest-cov traitlets ipywidgets faker psutil
 
-# Install Auditwheel - not available on Python 2
+# Install Auditwheel
 RUN python3.6 -m pip install --ignore-installed auditwheel
 RUN python3.7 -m pip install --ignore-installed auditwheel
 RUN python3.8 -m pip install --ignore-installed auditwheel

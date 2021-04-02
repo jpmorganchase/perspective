@@ -8,7 +8,7 @@
  */
 const {bash, execute, execute_throw, docker, resolve, getarg, python_image} = require("./script_utils.js");
 
-let PYTHON = getarg("--python2") ? "python2" : getarg("--python38") ? "python3.8" : "python3.7";
+const PYTHON = getarg("--python39") ? "python3.9" : getarg("--python38") ? "python3.8" : getarg("--python36") ? "python3.6" : "python3.7";
 
 const COVERAGE = getarg("--coverage");
 const VERBOSE = getarg("--debug");

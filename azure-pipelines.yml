@@ -73,11 +73,6 @@ jobs:
 
   strategy:
     matrix:
-      Python27ManyLinux2010:
-        python.version: '2.7'
-        python_flag: '--python2'
-        manylinux_flag: '--manylinux2010'
-        artifact_name: 'cp27-cp27m-manylinux2010_x86_64'
       Python37ManyLinux2010:
         python.version: '3.7'
         python_flag: ''
