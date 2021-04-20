@@ -7,14 +7,13 @@
  *
  */
 
-import {DOMWidgetModel, ISerializers} from "@jupyter-widgets/base";
+import {DOMWidgetModel} from "@jupyter-widgets/base";
 import {PERSPECTIVE_VERSION} from "./version";
 
 /**
  * TODO: document
  */
 export class PerspectiveModel extends DOMWidgetModel {
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     defaults() {
         return {
             ...super.defaults(),
@@ -41,7 +40,7 @@ export class PerspectiveModel extends DOMWidgetModel {
         };
     }
 
-    static serializers: ISerializers = {
+    static serializers = {
         ...DOMWidgetModel.serializers
         // Add any extra serializers here
     };

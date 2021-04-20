@@ -7,19 +7,7 @@
  *
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import {DOMWidgetView} from "@jupyter-widgets/base";
 import {Client} from "@finos/perspective/dist/esm/api/client";
-
-/**
- * The schema for a message passed to and from `PerspectiveJupyterClient`.
- */
-export interface PerspectiveJupyterMessage {
-    id: number;
-    type: string;
-    data: any;
-}
 
 /**
  * `PerspectiveJupyterClient` acts as a message bus between the frontend and
@@ -31,7 +19,7 @@ export interface PerspectiveJupyterMessage {
  * `@finos/perspective/api`.
  */
 export class PerspectiveJupyterClient extends Client {
-    view: DOMWidgetView;
+    view;
 
     /**
      * Create a new instance of the client.
@@ -39,7 +27,7 @@ export class PerspectiveJupyterClient extends Client {
      * @param view {DOMWidgetView} the plugin view that can send messages to the
      * Python backend.
      */
-    constructor(view: DOMWidgetView) {
+    constructor(view) {
         super();
         this.view = view;
     }
@@ -52,7 +40,7 @@ export class PerspectiveJupyterClient extends Client {
      *
      * @param msg {any} the message to pass to the `PerspectiveManager`.
      */
-    send(msg: any): void {
+    send(msg) {
         // Handle calls to `update` with a binary by setting `binary_length`
         // to true, so the kernel knows to handle the arraybuffer properly.
         if (msg.method === "update" && msg.args.length === 2 && msg.args[0] instanceof ArrayBuffer) {

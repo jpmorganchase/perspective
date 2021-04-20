@@ -6,9 +6,9 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {PerspectiveModel} from "../../../src/ts/model";
-import {PerspectiveView} from "../../../src/ts/view";
-import {PerspectiveJupyterWidget} from "../../../src/ts/widget";
+import {PerspectiveModel} from "../../../src/js/model";
+import {PerspectiveView} from "../../../src/js/view";
+import {PerspectiveJupyterWidget} from "../../../src/js/widget";
 import {ManagerBase} from "@jupyter-widgets/base-manager";
 import {uuid} from "@jupyter-widgets/base";
 
@@ -16,7 +16,7 @@ jest.mock("@finos/perspective-vieux/pkg/perspective_vieux_bg.wasm", () => {
     return {set_panic_hook: () => {}};
 });
 
-jest.mock("../../../src/ts/widget");
+jest.mock("../../../src/js/widget");
 
 let numComms = 0;
 

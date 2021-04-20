@@ -8,10 +8,12 @@
         "dist/*.js",
         "dist/*.wasm",
         "src/css/*.css",
-        "babel.config.js"
+        "babel.config.js",
+        "index.d.ts"
     ],
+    "typings": "index.d.ts",
+    "types": "index.d.ts",
     "main": "dist/index.js",
-    "types": "dist/index.d.ts",
     "directories": {
         "dist": "dist/"
     },
@@ -44,15 +46,11 @@
     "devDependencies": {
         "@finos/perspective-test": "^0.7.0",
         "@jupyter-widgets/base-manager": "^1.0.0-alpha.0",
-        "@types/jest": "^23.3.9",
-        "@types/node": "^11.11.0",
         "file-loader": "^0.11.1",
         "identity-obj-proxy": "^3.0.0",
         "isomorphic-fetch": "^2.2.1",
         "jest-transform-css": "^2.0.0",
-        "source-map-support": "^0.5.9",
-        "ts-jest": "^25.1.0",
-        "typescript": "^3.7.4"
+        "source-map-support": "^0.5.9"
     },
     "jupyterlab": {
         "extension": true

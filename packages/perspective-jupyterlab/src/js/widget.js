@@ -7,21 +7,13 @@
  *
  */
 
-import {Message} from "@lumino/messaging";
-import {DOMWidgetView} from "@jupyter-widgets/base";
-
-import {PerspectiveViewerOptions} from "@finos/perspective-viewer";
-import {PerspectiveWidget, PerspectiveWidgetOptions} from "./psp_widget";
-
-export type PerspectiveJupyterWidgetOptions = {
-    view: DOMWidgetView;
-};
+import {PerspectiveWidget} from "./psp_widget";
 
 /**
  * PerspectiveJupyterWidget is the ipywidgets front-end for the Perspective Jupyterlab plugin.
  */
 export class PerspectiveJupyterWidget extends PerspectiveWidget {
-    constructor(name = "Perspective", options: PerspectiveViewerOptions & PerspectiveJupyterWidgetOptions & PerspectiveWidgetOptions) {
+    constructor(name = "Perspective", options) {
         const view = options.view;
         delete options.view;
         super(name, options);
@@ -34,7 +26,7 @@ export class PerspectiveJupyterWidget extends PerspectiveWidget {
      * Any custom lumino widget used inside a Jupyter widget should override
      * the processMessage function like this.
      */
-    processMessage(msg: Message): void {
+    processMessage(msg) {
         super.processMessage(msg);
         this._view.processPhosphorMessage(msg);
     }
@@ -44,7 +36,7 @@ export class PerspectiveJupyterWidget extends PerspectiveWidget {
      *
      * This causes the view to be destroyed as well with 'remove'
      */
-    dispose(): void {
+    dispose() {
         if (this.isDisposed) {
             return;
         }
@@ -58,5 +50,5 @@ export class PerspectiveJupyterWidget extends PerspectiveWidget {
         this._view = null;
     }
 
-    private _view: DOMWidgetView;
+    _view;
 }

@@ -19,22 +19,6 @@
         "experimentalObjectRestSpread": true
     },
     "overrides": [{
-        "files": ["*.ts", "*.tsx"],
-        "plugins": [
-            "prettier",
-            "@typescript-eslint/eslint-plugin"
-        ],
-        "parser": "@typescript-eslint/parser",
-        "extends":  [
-            "plugin:@typescript-eslint/recommended"
-        ],
-        "rules": {
-            "@typescript-eslint/no-explicit-any": "off",
-            "camelcase": "off",
-            "@typescript-eslint/camelcase": "off"
-
-        }
-    }, {
         "files": ["**/test/**/*.js"],
         "rules": {
             "max-len": ["warn", {
@@ -63,7 +47,6 @@
             "comments": 80,
             "ignoreTrailingComments": true
         }],
-        "@typescript-eslint/camelcase": "off",
         "linebreak-style": ["error","unix"],
         "camelcase": "off",
         "no-const-assign": "error",

@@ -1,3 +1,12 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2021, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
 module.exports = {
     roots: [
         "packages/perspective/test/js",
@@ -12,8 +21,6 @@ module.exports = {
     transform: {
         ".js$": "@finos/perspective-test/src/js/transform.js",
         ".html$": "html-loader-jest",
-        // Transform typescript for perspective-jupyterlab
-        ".ts": "ts-jest"
     },
     collectCoverage: true,
     collectCoverageFrom: ["packages/perspective/dist/cjs/**"],

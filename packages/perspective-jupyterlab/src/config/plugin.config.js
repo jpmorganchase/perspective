@@ -12,10 +12,10 @@ const path = require("path");
 module.exports = {
     mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
     entry: {
-        index: "./src/ts/index.ts"
+        index: "./src/js/index.js"
     },
     resolve: {
-        extensions: [".ts", ".js"],
+        extensions: [".js"],
         fallback: {
             path: false,
             fs: false,
@@ -48,9 +48,9 @@ module.exports = {
                 }
             },
             {
-                test: /\.ts$/,
+                test: /\.js$/,
                 exclude: /node_modules/,
-                loader: "ts-loader"
+                loader: "babel-loader"
             },
             {
                 test: /\.wasm$/,

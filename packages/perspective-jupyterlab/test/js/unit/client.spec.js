@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {PerspectiveJupyterClient} from "../../../src/ts/client";
+import {PerspectiveJupyterClient} from "../../../src/js/client";
 import * as widget_base from "@jupyter-widgets/base";
 
 /**

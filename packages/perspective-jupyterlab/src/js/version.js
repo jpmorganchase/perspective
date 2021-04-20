@@ -7,7 +7,6 @@
  *
  */
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg_json = require("../../package.json");
 
 export const PERSPECTIVE_VERSION = pkg_json.version;

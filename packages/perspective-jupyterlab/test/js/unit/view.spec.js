@@ -8,15 +8,15 @@
  */
 
 import {MockManager} from "../mocks/manager";
-import {PerspectiveJupyterClient} from "../../../src/ts/client";
-import {PerspectiveJupyterWidget} from "../../../src/ts/widget";
+import {PerspectiveJupyterClient} from "../../../src/js/client";
+import {PerspectiveJupyterWidget} from "../../../src/js/widget";
 import {uuid} from "@jupyter-widgets/base";
 
 // Mock the client so we can see what send() was called with.
-jest.mock("../../../src/ts/client");
+jest.mock("../../../src/js/client");
 
 // Mock the widget so we can track its state changes on the view.
-jest.mock("../../../src/ts/widget");
+jest.mock("../../../src/js/widget");
 
 describe("PerspectiveView", function() {
     describe("_handle_message", function() {
