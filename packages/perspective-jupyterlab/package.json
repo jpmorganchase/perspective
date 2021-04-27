@@ -27,7 +27,10 @@
         "test:build": "cpx \"test/html/*\" dist/umd && cpx \"test/csv/*\" dist/umd && cpx \"test/css/*\" dist/umd && webpack --color --config src/config/webpack.config.js",
         "test:run": "jest --rootDir=. --config=test/config/jest.config.js --color --verbose",
         "test": "npm-run-all test:build test:run",
-        "build": "webpack --color --config src/config/plugin.config.js",
+        "build": "npm-run-all -s build:webpack build:labextension build:nbextension",
+        "build:webpack": "webpack --color --config src/config/plugin.config.js",
+        "build:nbextension": "webpack --color --config src/config/notebook.config.js",
+        "build:labextension": "rimraf ../../python/perspective/perspective/labextension && jupyter labextension build .",
         "clean": "rimraf dist",
         "version": "yarn build"
     },
@@ -43,6 +46,7 @@
     },
     "devDependencies": {
         "@finos/perspective-test": "^0.7.0",
+        "@jupyterlab/builder": "3.0.6",
         "@jupyter-widgets/base-manager": "^1.0.0-alpha.0",
         "@types/jest": "^23.3.9",
         "@types/node": "^11.11.0",
@@ -55,6 +59,14 @@
         "typescript": "^3.7.4"
     },
     "jupyterlab": {
-        "extension": true
+        "extension": "dist/index.js",
+         "webpackConfig": "./src/config/prebuilt.config.js",
+         "outputDir": "../../python/perspective/perspective/labextension",
+         "sharedPackages": {
+             "@jupyter-widgets/base": {
+               "bundled": false,
+               "singleton": true
+             }
+        }
     }
 }

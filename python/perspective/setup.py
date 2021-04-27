@@ -7,7 +7,6 @@
 #
 from __future__ import print_function
 
-import io
 import os
 import os.path
 import platform
@@ -17,6 +16,8 @@ import sys
 from codecs import open
 from distutils.version import LooseVersion
 
+from jupyter_packaging import combine_commands  # install_npm,
+from jupyter_packaging import create_cmdclass, ensure_targets, get_version
 from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext
 from setuptools.command.sdist import sdist
@@ -39,6 +40,7 @@ except ImportError:
     CPU_COUNT = multiprocessing.cpu_count()
 
 here = os.path.abspath(os.path.dirname(__file__))
+name = "perspective"
 
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read().replace("\r\n", "\n")
@@ -65,6 +67,7 @@ if (sys.version_info.major == 2 and sys.version_info.minor < 7) or (
 requires_dev_py2 = [
     "Faker>=1.0.0",
     "flake8>=3.7.8",
+    "jupyter_packaging",
     "mock",
     "pybind11>=2.4.0",
     "pyarrow>=0.16.0",
@@ -75,7 +78,6 @@ requires_dev_py2 = [
     "pytz>=2018.9",
     "Sphinx>=1.8.4",
     "sphinx-markdown-builder>=0.5.2",
-    "wheel",
 ] + requires
 
 requires_dev = [
@@ -84,18 +86,42 @@ requires_dev = [
 ] + requires_dev_py2  # for development, remember to install black and flake8-black
 
 
-def get_version(file, name="__version__"):
-    """Get the version of the package from the given file by
-    executing it and extracting the given `name`.
-    """
-    path = os.path.realpath(file)
-    version_ns = {}
-    with io.open(path, encoding="utf8") as f:
-        exec(f.read(), {}, version_ns)
-    return version_ns[name]
+version = get_version(os.path.join(here, name, "core", "_version.py"))
+
+# Representative files that should exist after a successful build
+jstargets = [
+    # os.path.join(here, name, 'nbextension', 'index.js'),
+    os.path.join(here, name, "labextension", "package.json"),
+]
 
 
-version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
+package_data_spec = {name: ["nbextension/**js*", "labextension/**"]}
+
+
+data_files_spec = [
+    (
+        "share/jupyter/nbextensions/finos-perspective-jupyterlab",
+        "{}/nbextension".format(name),
+        "**",
+    ),
+    (
+        "share/jupyter/labextensions/@finos/perspective-jupyterlab",
+        "{}/labextension".format(name),
+        "**",
+    ),
+    ("share/jupyter/labextensions/@finos/perspective-jupyterlab", ".", "install.json"),
+    ("etc/jupyter/nbconfig/notebook.d", ".", "finos-perspective-jupyterlab.json"),
+]
+
+
+cmdclass = create_cmdclass(
+    "jsdeps", package_data_spec=package_data_spec, data_files_spec=data_files_spec
+)
+
+cmdclass["jsdeps"] = combine_commands(
+    # install_npm(here, build_cmd='build_python_labextension'),
+    ensure_targets(jstargets),
+)
 
 
 class PSPExtension(Extension):
@@ -219,6 +245,9 @@ class PSPBuild(build_ext):
         print()  # Add an empty line for cleaner output
 
 
+cmdclass["build_ext"] = PSPBuild
+
+
 class PSPCheckSDist(sdist):
     def run(self):
         self.run_check()
@@ -233,6 +262,17 @@ class PSPCheckSDist(sdist):
                         path
                     )
                 )
+        for file in ("labextension/package.json", "nbextension/index.js"):
+            path = os.path.abspath(os.path.join(here, "perspective", file))
+            if not os.path.exists(path):
+                raise Exception(
+                    "Path is missing! {}\nMust run `yarn build_js` before building sdist so extension js files are installed".format(
+                        path
+                    )
+                )
+
+
+cmdclass["sdist"] = PSPCheckSDist
 
 
 setup(
@@ -261,5 +301,5 @@ setup(
     install_requires=requires,
     extras_require={"dev": requires_dev, "devpy2": requires_dev_py2},
     ext_modules=[PSPExtension("perspective")],
-    cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist),
+    cmdclass=cmdclass,
 )

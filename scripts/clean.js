@@ -33,12 +33,14 @@ try {
         clean(
             "python/perspective/dist",
             "python/perspective/build",
+            "python/perspective/coverage.xml",
+            "python/perspective/.coverage",
             "python/perspective/docs/build",
             "python/perspective/perspective_python.egg-info",
-            "python/perspective/.coverage",
+            "python/perspective/perspective/labextension",
+            "python/perspective/perspective/nbextension",
             "python/perspective/.pytest_cache",
             "python/perspective/python_junit.xml",
-            "python/perspective/coverage.xml",
             ...glob.sync("python/perspective/**/*.pyc"),
             ...glob.sync("python/perspective/**/__pycache__")
         );

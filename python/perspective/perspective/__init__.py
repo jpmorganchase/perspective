@@ -6,7 +6,11 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-from .libpsp import *  # noqa: F401, F403
-from .core import *  # noqa: F401, F403
-from .core._version import __version__  # noqa: F401
-from .widget import *  # noqa: F401, F403
+from .libpsp import *
+from .core import *
+from .core._version import __version__
+from .widget import *
+
+
+def _jupyter_labextension_paths():
+    return [{"src": "labextension", "dest": "@finos/perspective-jupyterlab"}]
