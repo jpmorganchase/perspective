@@ -129,6 +129,19 @@ parameters:
           codeCoverageTool: Cobertura
           summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
 
+  - name: pythonSDistSteps
+    type: stepList
+    default:
+      # Build a python sdist
+      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective && ../scripts/build_sdist.sh
+        displayName: 'Build sdist'
+
+      # Save the artifact to Azure storage
+      - task: PublishPipelineArtifact@1
+        inputs:
+          targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
+          artifactName: 'perspective-python-CI.tar.gz'
+
   - name: pythonMacWheelSteps
     type: stepList
     default:
@@ -338,3 +351,4 @@ jobs:
     - ${{ parameters.pythonBuildSteps }}
     - ${{ parameters.pythonCoverageSteps }}
     - ${{ parameters.pythonMacWheelSteps }}
+    - ${{ parameters.pythonSDistSteps }}
