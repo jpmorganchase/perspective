@@ -133,7 +133,7 @@ parameters:
     type: stepList
     default:
       # Build a python sdist
-      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective && ../scripts/build_sdist.sh
+      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective && ./scripts/build_sdist.sh
         displayName: 'Build sdist'
 
       # Save the artifact to Azure storage
