@@ -9,7 +9,7 @@ SDIST_NAME=perspective-python
 SDIST_VERSION=`git describe --abbrev=0 --tags  | cut -c2-`
 SDIST_FULL_NAME=$SDIST_NAME-$SDIST_VERSION
 SDIST_FULL_NAME_TAR=$SDIST_FULL_NAME.tar.gz
-SDIST_PUBLISH_NAME=perspective-python-CI.tar.gz
+SDIST_PUBLISH_NAME=$SDIST_PUBLISH_NAME.tar.gz
 
 # Remove build assets
 rm -rf perspective/table/*.{so,dll}

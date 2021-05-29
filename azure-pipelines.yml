@@ -133,14 +133,14 @@ parameters:
     type: stepList
     default:
       # Build a python sdist
-      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective && ./scripts/build_sdist.sh
+      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective && SDIST_PUBLISH_NAME="perspective-python-$(SourceBranchName)-$(Build.BuildId)-$(Rev:r)-$(Date:yyyyMMdd)" ./scripts/build_sdist.sh
         displayName: 'Build sdist'
 
       # Save the artifact to Azure storage
       - task: PublishPipelineArtifact@1
         inputs:
           targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
-          artifactName: 'perspective-python-CI.tar.gz'
+          artifactName: 'perspective-python-$(SourceBranchName)-$(Build.BuildId)-$(Rev:r)-$(Date:yyyyMMdd).tar.gz'
 
   - name: pythonMacWheelSteps
     type: stepList
