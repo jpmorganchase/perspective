@@ -292,7 +292,7 @@ jobs:
     - ${{ parameters.pythonCoverageSteps }}
     - ${{ parameters.pythonLinuxWheelSteps }}
 
-- job: 'Linux'
+- job: 'Linux - Python SDist Isolated'
   pool:
     vmImage: 'ubuntu-16.04'
 
