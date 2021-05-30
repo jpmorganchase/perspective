@@ -292,6 +292,22 @@ jobs:
     - ${{ parameters.pythonCoverageSteps }}
     - ${{ parameters.pythonLinuxWheelSteps }}
 
+- job: 'Linux'
+  pool:
+    vmImage: 'ubuntu-16.04'
+
+  strategy:
+    matrix:
+      Python37:
+        python.version: '3.7'
+        python_flag: ''
+
+  steps:
+    - ${{ parameters.initSteps }}
+    - ${{ parameters.linuxInitSteps }}
+    - ${{ parameters.pythonBuildSteps }}
+    - ${{ parameters.pythonSDistSteps }}
+
 
 - job: 'Windows'
   pool:
@@ -354,4 +370,3 @@ jobs:
     - ${{ parameters.pythonBuildSteps }}
     - ${{ parameters.pythonCoverageSteps }}
     - ${{ parameters.pythonMacWheelSteps }}
-    - ${{ parameters.pythonSDistSteps }}
