@@ -103,6 +103,9 @@ extern "C" {
     #[wasm_bindgen(method)]
     pub fn restore(this: &PerspectiveViewerJsPlugin, token: &JsValue);
 
+    #[wasm_bindgen(method)]
+    pub fn render(this: &PerspectiveViewerJsPlugin);
+
     #[wasm_bindgen(method, catch)]
     pub async fn draw(
         this: &PerspectiveViewerJsPlugin,

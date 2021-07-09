@@ -91,6 +91,54 @@ export function register(...plugins) {
                         chart.plugin.max_columns = x;
                     }
 
+                    async render() {
+                        var canvas = document.createElement("canvas");
+                        var container = this.shadowRoot.querySelector("#container");
+                        canvas.width = container.offsetWidth;
+                        canvas.height = container.offsetHeight;
+
+                        // document.body.appendChild(canvas);
+                        const context = canvas.getContext("2d");
+                        context.fillStyle = "white";
+                        context.fillRect(0, 0, canvas.width, canvas.height);
+
+                        for (const svg of Array.from(this.shadowRoot.querySelectorAll("svg:not(#dragHandles)"))) {
+                            var img = document.createElement("img");
+                            // document.body.appendChild(img);
+                            img.width = svg.parentNode.offsetWidth;
+                            img.height = svg.parentNode.offsetHeight;
+
+                            // Pretty sure this is a chrome bug - `drawImage()` call
+                            // without this scales incorrectly.
+                            if (!svg.hasAttribute("viewBox")) {
+                                svg.setAttribute("viewBox", `0 0 ${img.width} ${img.height}`);
+                            }
+
+                            var xml = new XMLSerializer().serializeToString(svg);
+                            const done = new Promise(x => (img.onload = x));
+                            img.src = `data:image/svg+xml;base64,${btoa(xml)}`;
+                            await done;
+                            console.log(`${img.width}x${img.height}`);
+                            context.drawImage(img, svg.parentNode.offsetLeft, svg.parentNode.offsetTop, img.width, img.height);
+                            // document.body.removeChild(img);
+                        }
+
+                        const button = document.createElement("a");
+                        document.body.appendChild(button);
+                        button.addEventListener(
+                            "click",
+                            function dlCanvas() {
+                                var dt = canvas.toDataURL("image/png"); // << this fails in IE/Edge...
+                                dt = dt.replace(/^data:image\/[^;]*/, "data:application/octet-stream");
+                                dt = dt.replace(/^data:application\/octet-stream/, "data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png");
+                                this.href = dt;
+                            },
+                            false
+                        );
+                        button.click();
+                        // document.body.removeChild(canvas);
+                    }
+
                     async draw(view, end_col, end_row) {
                         await this.update(view, end_col, end_row, true);
                     }

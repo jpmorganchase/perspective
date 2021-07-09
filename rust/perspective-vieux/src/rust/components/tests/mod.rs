@@ -8,7 +8,8 @@
 
 mod column_style;
 mod plugin_selector;
+mod radio_list;
 mod split_panel;
 mod status_bar;
 mod status_bar_counter;
-mod radio_list;
+mod test_plugin;

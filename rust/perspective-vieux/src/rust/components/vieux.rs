@@ -160,6 +160,7 @@ impl Component for PerspectiveVieux {
                     <StatusBar
                         id="status_bar"
                         stats=self.stats.clone()
+                        plugin=self.props.plugin.clone()
                         on_reset=self.link.callback(|_| Msg::Reset)
                         on_download=self.link.callback(Msg::Export)
                         on_copy=self.link.callback(Msg::Copy)>

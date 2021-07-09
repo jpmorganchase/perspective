@@ -7,9 +7,13 @@
 // file.
 
 use crate::components::status_bar::*;
+use crate::plugin::*;
 use crate::session::TableStats;
+use crate::session::*;
 use crate::utils::*;
 use crate::*;
+
+use super::test_plugin::*;
 
 use std::cell::Cell;
 use std::rc::Rc;
@@ -21,6 +25,9 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 pub fn test_callbacks_invoked() {
+    register_test_components().unwrap();
+    let session = Session::new();
+    let plugin = Plugin::new(session);
     let link: WeakComponentLink<StatusBar> = WeakComponentLink::default();
     let token = Rc::new(Cell::new(0));
     let on_reset = Callback::from({
@@ -45,6 +52,7 @@ pub fn test_callbacks_invoked() {
             on_reset=on_reset
             on_download=on_download
             on_copy=on_copy
+            plugin=plugin
             stats=None>
         </StatusBar>
     };
@@ -62,6 +70,9 @@ pub fn test_callbacks_invoked() {
 }
 
 fn gen(stats: &Option<TableStats>) -> (WeakComponentLink<StatusBar>, HtmlElement) {
+    let session = Session::new();
+    let plugin = Plugin::new(session);
+
     let link: WeakComponentLink<StatusBar> = WeakComponentLink::default();
     let div = NodeRef::default();
     let on_reset = Callback::from(|()| ());
@@ -75,6 +86,7 @@ fn gen(stats: &Option<TableStats>) -> (WeakComponentLink<StatusBar>, HtmlElement
             on_reset=on_reset
             on_download=on_download
             on_copy=on_copy
+            plugin=plugin
             stats=stats.clone()>
         </StatusBar>
     };
