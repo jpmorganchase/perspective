@@ -6,20 +6,22 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use super::column_selector::ColumnSelector;
+use super::config_selector::ConfigSelector;
 use super::plugin_selector::PluginSelector;
 use super::render_warning::RenderWarning;
 use super::split_panel::SplitPanel;
 use super::status_bar::StatusBar;
 
-use crate::js::perspective::*;
+use crate::config::*;
+use crate::dragdrop::*;
 use crate::renderer::*;
 use crate::session::Session;
 use crate::utils::*;
 
 use futures::channel::oneshot::*;
-use wasm_bindgen::{prelude::*, JsCast};
-use wasm_bindgen_futures::spawn_local;
-use web_sys::*;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::future_to_promise;
 use yew::prelude::*;
 
 pub static CSS: &str = include_str!("../../../dist/css/perspective-vieux.css");
@@ -30,13 +32,13 @@ pub struct PerspectiveVieuxProps {
     // pub panels: (web_sys::HtmlElement, web_sys::HtmlElement),
     pub session: Session,
     pub renderer: Renderer,
+    pub dragdrop: DragDrop,
 
     #[prop_or_default]
     pub weak_link: WeakComponentLink<PerspectiveVieux>,
 }
 
 pub enum Msg {
-    LoadTable(JsPerspectiveTable, Sender<Result<JsValue, JsValue>>),
     Reset,
     ToggleConfig(Option<bool>, Option<Sender<Result<JsValue, JsValue>>>),
     ToggleConfigFinished(Sender<()>),
@@ -65,18 +67,19 @@ impl Component for PerspectiveVieux {
         }
     }
 
-    /// TODO would like a cleaner abstraction for `Msg` which contains a Promise
-    /// resolving `Sender`.  Also, likewise for on_rendered, which will silently
-    /// drop any async-overlap bugs in this function.
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::LoadTable(table, sender) => {
-                self.set_session_table(sender, table);
-                false
-            }
             Msg::Reset => {
-                let event = web_sys::CustomEvent::new("perspective-vieux-reset");
-                self.props.elem.dispatch_event(&event.unwrap()).unwrap();
+                let renderer = self.props.renderer.clone();
+                let session = self.props.session.clone();
+                let update = ViewConfigUpdate::default();
+                let _ = future_to_promise(async move {
+                    session.reset();
+                    renderer.reset();
+                    session.create_view(update).await?;
+                    renderer.draw(async { &session }).await
+                });
+
                 false
             }
             Msg::ToggleConfig(force, resolve) => {
@@ -125,19 +128,28 @@ impl Component for PerspectiveVieux {
                     <style>{ &CSS }</style>
                     <SplitPanel id="app_panel">
                         <div id="side_panel" class="column noselect">
-                            <PluginSelector renderer=self.props.renderer.clone()>
+                            <PluginSelector
+                                renderer=self.props.renderer.clone()>
                             </PluginSelector>
-                            <slot name="side_panel"></slot>
+                            <ColumnSelector
+                                dragdrop=self.props.dragdrop.clone()
+                                renderer=self.props.renderer.clone()
+                                session=self.props.session.clone()>
+                            </ColumnSelector>
                         </div>
                         <div id="main_column">
-                            <slot name="top_panel"></slot>
+                            <ConfigSelector
+                                dragdrop=self.props.dragdrop.clone()
+                                session=self.props.session.clone()
+                                renderer=self.props.renderer.clone()>
+                            </ConfigSelector>
                             <div id="main_panel_container">
                                 <RenderWarning
                                     dimensions=self.dimensions
                                     session=self.props.session.clone()
                                     renderer=self.props.renderer.clone()>
                                 </RenderWarning>
-                                <slot name="main_panel"></slot>
+                                <slot></slot>
                             </div>
                         </div>
                     </SplitPanel>
@@ -146,7 +158,11 @@ impl Component for PerspectiveVieux {
                         session=self.props.session.clone()
                         on_reset=self.link.callback(|_| Msg::Reset)>
                     </StatusBar>
-                    <div id="config_button" class="noselect button" onclick=config></div>
+                    <div
+                        id="config_button"
+                        class="noselect button"
+                        onclick=config>
+                    </div>
                 </>
             }
         } else {
@@ -159,7 +175,7 @@ impl Component for PerspectiveVieux {
                         renderer=self.props.renderer.clone()>
                     </RenderWarning>
                     <div id="main_panel_container">
-                        <slot name="main_panel"></slot>
+                        <slot></slot>
                     </div>
                     <div id="config_button" class="noselect button" onclick=config></div>
                 </>
@@ -211,20 +227,6 @@ impl PerspectiveVieux {
             }
         };
     }
-
-    /// Helper to `await` the provided `Table` and then trigger the resulting state
-    /// and UI changes.
-    fn set_session_table(
-        &mut self,
-        sender: Sender<Result<JsValue, JsValue>>,
-        table: JsPerspectiveTable,
-    ) {
-        let session = self.props.session.clone();
-        session.reset_stats();
-        spawn_local(async move {
-            sender.send(session.set_table(table).await).unwrap();
-        });
-    }
 }
 
 /// Dispatch the "perspective-toggle-settings" event to notify external
@@ -233,32 +235,30 @@ fn dispatch_settings_event(
     vieux_elem: &web_sys::HtmlElement,
     open: bool,
 ) -> Result<(), JsValue> {
-    if let Some(element) = find_custom_element(vieux_elem) {
-        let mut event_init = web_sys::CustomEventInit::new();
-        event_init.detail(&JsValue::from(open));
-        let event = web_sys::CustomEvent::new_with_event_init_dict(
-            "perspective-toggle-settings",
-            &event_init,
-        );
+    let mut event_init = web_sys::CustomEventInit::new();
+    event_init.detail(&JsValue::from(open));
+    let event = web_sys::CustomEvent::new_with_event_init_dict(
+        "perspective-toggle-settings",
+        &event_init,
+    );
 
-        element.toggle_attribute_with_force("settings", open)?;
-        element.dispatch_event(&event.unwrap()).unwrap();
-    }
+    vieux_elem.toggle_attribute_with_force("settings", open)?;
+    vieux_elem.dispatch_event(&event.unwrap()).unwrap();
 
     Ok(())
 }
 
-/// Find the root `<perspective-viewer>` Custom Element from the embedded
-/// `<perspective-vieux>` element reference by piercing the parent Shadow Dom.
-fn find_custom_element(elem: &HtmlElement) -> Option<web_sys::Element> {
-    let elem = elem.parent_node();
-    if elem.is_none() {
-        None
-    } else {
-        elem.map(|elem| {
-            elem.get_root_node()
-                .unchecked_into::<web_sys::ShadowRoot>()
-                .host()
-        })
-    }
-}
+// /// Find the root `<perspective-viewer>` Custom Element from the embedded
+// /// `<perspective-vieux>` element reference by piercing the parent Shadow Dom.
+// fn find_custom_element(elem: &HtmlElement) -> Option<web_sys::Element> {
+//     let elem = elem.parent_node();
+//     if elem.is_none() {
+//         None
+//     } else {
+//         elem.map(|elem| {
+//             elem.get_root_node()
+//                 .unchecked_into::<web_sys::ShadowRoot>()
+//                 .host()
+//         })
+//     }
+// }

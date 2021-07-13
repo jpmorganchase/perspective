@@ -21,17 +21,64 @@ use self::view_subscription::*;
 
 use copy::*;
 use download::*;
+use serde::Deserialize;
 use std::cell::RefCell;
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::fmt::Display;
 use std::iter::FromIterator;
+use std::iter::IntoIterator;
 use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 
 use yew::prelude::*;
 
+#[derive(Deserialize, Clone, Copy)]
+pub enum Type {
+    #[serde(rename = "string")]
+    String,
+
+    #[serde(rename = "integer")]
+    Integer,
+
+    #[serde(rename = "float")]
+    Float,
+
+    #[serde(rename = "boolean")]
+    Bool,
+
+    #[serde(rename = "date")]
+    Date,
+
+    #[serde(rename = "datetime")]
+    Datetime,
+}
+
+impl Display for Type {
+    fn fmt(
+        &self,
+        fmt: &mut std::fmt::Formatter<'_>,
+    ) -> std::result::Result<(), std::fmt::Error> {
+        write!(
+            fmt,
+            "{}",
+            match self {
+                Type::String => "string",
+                Type::Integer => "integer",
+                Type::Float => "float",
+                Type::Bool => "bool",
+                Type::Date => "date",
+                Type::Datetime => "datetime",
+            }
+        )
+    }
+}
+
 #[derive(Default)]
 struct SessionMetadataCache {
     column_names: Vec<String>,
+    schema: HashMap<String, Type>,
 }
 
 /// The `Session` struct is the principal interface to the Perspective engine,
@@ -87,20 +134,25 @@ impl Session {
         self.borrow().on_view_created.add_listener(on_view_created)
     }
 
+    pub fn reset(&self) {
+        self.borrow_mut().view_sub = None;
+        self.borrow_mut().config.reset();
+    }
+
     /// Reset this (presumably shared) `Session` to its initial state, returning a
     /// bool indicating whether this `Session` had a table which was deleted.
     /// TODO decide whether to delete the table.
-    pub fn reset(&self) -> bool {
-        self.clear_view();
+    pub fn delete(&self) -> bool {
+        self.reset();
         self.borrow_mut().metadata = None;
         self.borrow_mut().table = None;
         false
     }
 
-    /// Reset this `Session`'s state with a new `Table`.  Implicitly calls
-    /// `clear_view()`, which will need to be re-initialized later via `set_view()`.
+    /// Reset this `Session`'s state with a new `Table`.  Implicitly clears the
+    /// `ViewSubscription`, which will need to be re-initialized later via `set_view()`.
     pub async fn set_table(
-        self,
+        &self,
         table: JsPerspectiveTable,
     ) -> Result<JsValue, JsValue> {
         let column_names = {
@@ -114,11 +166,20 @@ impl Session {
             }
         };
 
-        self.clear_view();
-        self.borrow_mut().table = Some(table);
-        self.borrow_mut().metadata = Some(SessionMetadataCache { column_names });
-        self.0.borrow().on_table_loaded.emit_all(());
+        let schema = table
+            .schema()
+            .await?
+            .into_serde::<HashMap<String, Type>>()
+            .to_jserror()?;
 
+        self.borrow_mut().view_sub = None;
+        self.borrow_mut().table = Some(table);
+        self.borrow_mut().metadata = Some(SessionMetadataCache {
+            column_names,
+            schema,
+        });
+
+        self.0.borrow().on_table_loaded.emit_all(());
         self.set_initial_stats().await?;
         Ok(JsValue::UNDEFINED)
     }
@@ -133,6 +194,14 @@ impl Session {
             .metadata
             .as_ref()
             .map(|meta| meta.column_names.clone())
+    }
+
+    pub fn get_column_type(&self, name: &str) -> Option<Type> {
+        self.borrow()
+            .metadata
+            .as_ref()
+            .and_then(|meta| meta.schema.get(name))
+            .cloned()
     }
 
     /// Validate an expression string (as a JsValue since it comes from `monaco`),
@@ -213,7 +282,7 @@ impl Session {
     /// Set a new `View` (derived from this `Session`'s `Table`), and create the
     /// `update()` subscription.
     pub async fn create_view(&self, config: ViewConfigUpdate) -> Result<View, JsValue> {
-        self.clear_view();
+        self.borrow_mut().view_sub = None;
         self.validate_and_apply_view_config(config).await?;
         let js_config = self.borrow().config.as_jsvalue()?;
         let table = self.borrow().table.clone().unwrap();
@@ -246,10 +315,6 @@ impl Session {
             .clone())
     }
 
-    fn clear_view(&self) {
-        self.borrow_mut().view_sub = None;
-    }
-
     pub fn reset_stats(&self) {
         self.update_stats(TableStats::default());
     }
@@ -259,7 +324,7 @@ impl Session {
     }
 
     /// Update the this `Session`'s `TableStats` data from the `Table`.
-    async fn set_initial_stats(self) -> Result<JsValue, JsValue> {
+    async fn set_initial_stats(&self) -> Result<JsValue, JsValue> {
         let table = self.borrow().table.clone();
         let num_rows = table.unwrap().size().await? as u32;
         let stats = TableStats {
@@ -288,45 +353,58 @@ impl Session {
         &self,
         update: ViewConfigUpdate,
     ) -> Result<(), JsValue> {
-        // let mut config = self.borrow().config.clone();
-        self.borrow_mut().config.apply_update(update);
-        // let all_columns: HashSet<String> = self
-        //     .borrow()
-        //     .metadata
-        //     .as_ref()
-        //     .unwrap()
-        //     .column_names
-        //     .iter()
-        //     .chain(config.expressions.iter())
-        //     .cloned()
-        //     .collect();
+        let mut config = self.borrow().config.clone();
+        config.apply_update(update);
+        let all_column_names = self
+            .borrow()
+            .metadata
+            .as_ref()
+            .unwrap()
+            .column_names
+            .clone();
 
-        // let mut view_columns: HashSet<&str> = HashSet::new();
+        let all_columns: HashSet<String> = all_column_names
+            .iter()
+            // .chain(config.expressions.iter())
+            .cloned()
+            .collect();
 
-        // // fix
-        // for column in config.columns.iter() {
-        //     if all_columns.contains(column) {
-        //         // TODO get real default
-        //         if !config.aggregates.contains_key(column) {
-        //             config.aggregates.insert(
-        //                 column.to_owned(),
-        //                 Aggregate::SingleAggregate(SingleAggregate::Count),
-        //             );
-        //         }
-        //         view_columns.insert(column);
-        //     } else {
-        //         return Err(JsValue::from(format!(
-        //             "Unknown \"{}\" in `columns`",
-        //             column
-        //         )));
-        //     }
-        // }
+        let mut view_columns: HashSet<&str> = HashSet::new();
 
-        // config
-        //     .aggregates
-        //     .retain(|column, _| view_columns.contains(column.as_str()));
+        // fix
+        if config.columns.is_empty() {
+            config.columns = all_column_names.into_iter().map(Some).collect();
+        }
 
-        // self.borrow_mut().config = config;
+        for column in config.columns.iter() {
+            if let Some(column) = column {
+                if all_columns.contains(column) {
+                    // TODO get real default
+                    if !config.aggregates.contains_key(column) {
+                        config.aggregates.insert(
+                            column.to_owned(),
+                            Aggregate::SingleAggregate(SingleAggregate::Count),
+                        );
+                    }
+                    view_columns.insert(column);
+                } else {
+                    web_sys::console::warn_1(&JsValue::from(format!(
+                        "Unknown \"{}\" in `columns`",
+                        column
+                    )))
+                    // return Err(JsValue::from(format!(
+                    //     "Unknown \"{}\" in `columns`",
+                    //     column
+                    // )));
+                }
+            }
+        }
+
+        config
+            .aggregates
+            .retain(|column, _| view_columns.contains(column.as_str()));
+
+        self.borrow_mut().config = config;
         Ok(())
     }
 }

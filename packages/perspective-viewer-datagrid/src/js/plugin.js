@@ -7,7 +7,6 @@
  *
  */
 
-import {registerPlugin} from "@finos/perspective-viewer/src/js/utils.js";
 import "regular-table";
 
 import {createModel, configureRegularTable, formatters, create_color_record} from "./regular_table_handlers.js";
@@ -29,7 +28,7 @@ customElements.define(
 
         async activate(view) {
             let viewer = this.parentElement;
-            let table = viewer.table;
+            let table = await viewer.getTable();
             if (!this._initialized) {
                 this.innerHTML = "";
                 this.appendChild(this.datagrid);
@@ -149,6 +148,6 @@ function _register_global_styles() {
  *
  */
 
-registerPlugin("perspective-viewer-datagrid");
+global.registerPlugin("perspective-viewer-datagrid");
 
 _register_global_styles();

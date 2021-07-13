@@ -12,6 +12,8 @@ use crate::renderer::*;
 use crate::utils::*;
 use crate::*;
 
+use super::dropdown::DropDown;
+
 use yew::prelude::*;
 
 #[derive(Properties, Clone)]
@@ -24,8 +26,8 @@ pub struct PluginSelectorProps {
 }
 
 pub enum PluginSelectorMsg {
-    SelectPlugin(String),
-    PluginSelected(String),
+    ComponentSelectPlugin(String),
+    RendererSelectPlugin(String),
 }
 
 pub struct PluginSelector {
@@ -41,10 +43,11 @@ impl Component for PluginSelector {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         enable_weak_link_test!(props, link);
         let _plugin_sub = props.renderer.add_on_plugin_changed({
-            let callback = link.callback(|plugin: JsPerspectiveViewerPlugin| {
-                PluginSelectorMsg::PluginSelected(plugin.name())
-            });
-            move |x| callback.emit(x)
+            clone!(link);
+            move |plugin: JsPerspectiveViewerPlugin| {
+                let name = plugin.name();
+                link.send_message(PluginSelectorMsg::RendererSelectPlugin(name))
+            }
         });
 
         PluginSelector {
@@ -56,11 +59,11 @@ impl Component for PluginSelector {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            PluginSelectorMsg::SelectPlugin(plugin_name) => {
+            PluginSelectorMsg::RendererSelectPlugin(_plugin_name) => true,
+            PluginSelectorMsg::ComponentSelectPlugin(plugin_name) => {
                 self.props.renderer.set_plugin(Some(&plugin_name)).unwrap();
                 false
             }
-            PluginSelectorMsg::PluginSelected(_plugin_name) => true,
         }
     }
 
@@ -69,31 +72,18 @@ impl Component for PluginSelector {
     }
 
     fn view(&self) -> Html {
-        let callback = self.link.callback(|data: ChangeData| {
-            PluginSelectorMsg::SelectPlugin(match data {
-                ChangeData::Select(e) => e.value(),
-                ChangeData::Value(x) => x,
-                ChangeData::Files(_) => PLUGIN_REGISTRY.default_plugin_name(),
-            })
-        });
+        let callback = self.link.callback(PluginSelectorMsg::ComponentSelectPlugin);
+        let plugin_name = self.props.renderer.get_active_plugin().unwrap().name();
 
         html! {
             <div id="plugin_selector_container">
-                <select id="plugin_selector" class="noselect" onchange=callback>{
-                    for PLUGIN_REGISTRY.available_plugin_names().iter().map(|name| {
-                        let selected = match self.props.renderer.get_active_plugin() {
-                            Ok(plugin) => plugin.name() == *name,
-                            Err(_) => false
-                        };
+                <DropDown<String>
+                    id="plugin_selector"
+                    values=PLUGIN_REGISTRY.available_plugin_names()
+                    selected=plugin_name
+                    on_select=callback>
 
-                        html! {
-                            <option
-                                selected=selected
-                                value=name.to_owned()>{ name }
-                            </option>
-                        }
-                    })
-                }</select>
+                </DropDown<String>>
             </div>
         }
     }

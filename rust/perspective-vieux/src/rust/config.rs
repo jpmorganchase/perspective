@@ -6,10 +6,16 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+mod aggregates;
+mod filters;
+mod sort;
 mod view_config;
 
 use crate::renderer::Renderer;
 
+pub use aggregates::*;
+pub use filters::*;
+pub use sort::*;
 pub use view_config::*;
 
 use serde::Deserialize;

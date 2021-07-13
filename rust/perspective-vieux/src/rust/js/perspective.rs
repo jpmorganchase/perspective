@@ -59,11 +59,16 @@ extern "C" {
     #[derive(Clone)]
     pub type JsPerspectiveTable;
 
+    pub type JsPerspectiveTableSchema;
+
     #[wasm_bindgen(method, catch, js_name = columns)]
     pub async fn _columns(this: &JsPerspectiveTable) -> Result<JsValue, JsValue>;
 
     #[wasm_bindgen(method, catch, js_name = delete)]
     pub async fn _delete(this: &JsPerspectiveTable) -> Result<JsValue, JsValue>;
+
+    #[wasm_bindgen(method, catch, js_name = schema)]
+    pub async fn _schema(this: &JsPerspectiveTable) -> Result<JsValue, JsValue>;
 
     #[wasm_bindgen(method, catch, js_name = size)]
     pub async fn _size(this: &JsPerspectiveTable) -> Result<JsValue, JsValue>;
@@ -131,6 +136,7 @@ impl JsPerspectiveTable {
     async_typed!(_columns, columns(&self) -> js_sys::Array);
     async_typed!(_delete, delete(&self) -> ());
     async_typed!(_validate_expressions, validate_expressions(&self, exprs: Array) -> JsPerspectiveValidatedExpressions);
+    async_typed!(_schema, schema(&self) -> JsPerspectiveTableSchema);
     async_typed!(_view, view(&self, config: &JsPerspectiveViewConfig) -> JsPerspectiveView);
     async_typed!(_size, size(&self) -> f64);
 }

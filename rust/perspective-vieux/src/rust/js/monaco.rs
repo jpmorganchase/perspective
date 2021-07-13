@@ -39,9 +39,9 @@ extern "C" {
     wasm_bindgen(inline_js = "
     export async function monaco_module() {
         return import(
-            /* webpackChunkName: \"perspective-viewer.monaco-exts\" */
+            /* webpackChunkName: \"monaco-exts\" */
             /* webpackMode: \"eager\" */
-            '../../../src/js/monaco.js'
+            '../../../../src/js/monaco.js'
         ); 
     }
 ")
@@ -61,7 +61,7 @@ extern "C" {
     wasm_bindgen(inline_js = "
     export async function monaco_module() { 
         return import(
-            /* webpackChunkName: \"perspective-viewer.monaco\" */
+            /* webpackChunkName: \"monaco\" */
             /* webpackMode: \"eager\" */
             'monaco-editor/esm/vs/editor/editor.api'
         ); 

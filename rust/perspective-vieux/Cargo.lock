@@ -633,7 +633,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "427c3892f9e783d91cc128285287e70a59e206ca452770ece88a76f7a3eddd72"
 
 [[package]]
-name = "perspective_vieux"
+name = "perspective-viewer"
 version = "0.10.0"
 dependencies = [
  "async-std",

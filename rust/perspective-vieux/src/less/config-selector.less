@@ -1,0 +1,262 @@
+
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "./variables.less";
+
+:host {
+
+    #top_panel {
+        
+    }
+
+    #top_panel {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        padding: var(--top_panel--padding, 5px 0px 10px 0px);
+        max-width: 1000px;
+        z-index: 1;
+
+        .row_close {
+            display: inline;
+            font-family: "Material Icons";
+            cursor: pointer;
+            min-width: 5px;
+            margin-right: 3px;
+            flex-grow: 0;
+            font-size: 12px;
+            margin-top: 2px;
+            margin-left: 3px;
+            margin-right: 0px;
+            &:before {
+                content: "close";
+            }
+        }
+
+        .pivot-column {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            span {
+                white-space: nowrap;
+            }
+        }
+
+        .pivot-column.config-drop:last-child, .pivot-column.config-drop ~ .pivot-column:last-child {
+            width: 0px;
+        }
+
+        #row_pivots label:before {
+            content: var(--row_pivots--before, "Row Pivots");
+        }
+
+        #column_pivots label:before {
+            content: var(--column_pivots--before, "Column Pivots");
+        }
+
+        #sort label:before {
+            content: "Order By";
+        }
+
+        #filter label:before {
+            content: "Where";
+        }
+
+        .highlight-drop {
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .config-drop {
+            & > * {
+                color: transparent;
+                &:first-child {
+                    background-color: rgba(0,0,0,0.1);
+                }
+            }
+        }
+
+        .rrow {
+            display: flex;
+            // flex-grow: 1;
+            min-height: 24px;
+            align-items: center;
+            max-width: 400px;
+            list-style: none;
+            min-width: 140px;
+            margin: var(--column-drop-container--margin, 5px 10px 0px 0px);
+        }
+
+        .rrow > div {
+            display: flex;
+            min-height: 24px;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .rrow > * {
+            width: 100%;
+            padding: 12px 0px 12px 0px;
+            margin: -12px 0px -12px 0px;
+        }
+
+        .psp-text-field ul {
+            min-height: 20px;
+        }
+
+        .psp-text-field {
+            position: relative;
+            background-color: var(--column-drop-container--background, white);
+            border-width: 0;
+            border-bottom-width: 1px;
+            border-style: solid;
+            border-color: var(--inactive--color, #ccc);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            min-height: 24px;
+            // background is nor transitionable ...
+            transition: border-color 0.3s ease-out, background-size 0.3s ease-out;
+            background-size: 100% 200%;
+        }
+
+        :host(.dragging) .psp-text-field.dropping {
+            border-bottom-width: 2px;
+            border-style: solid;
+            border-color: var(--active--color, @blue500);
+        }
+
+        :host(.dragging) .psp-text-field {
+            border-bottom-width: 1px;
+            border-style: solid;
+            border-color: var(--active--color, @blue500);
+            background: var(--input-dragover--background, linear-gradient(to top, rgb(203, 231, 249), transparent 25%));
+            background-size: 100% 100%;
+        }
+
+        .psp-text-field > .psp-text-field__input {
+            border: 0px;
+            line-height: 20px;
+            vertical-align: bottom;
+            padding-bottom: 0px;
+            display: none;
+            margin: 0;
+            padding: 0 48px 0 0;
+            font-size: 12px;
+            min-height: 24px;
+            margin-bottom: -1px;
+
+            // Comma separators
+            &:not(.column-drop) > ::after {
+                content: ",";
+                margin-right: 6px;
+            }
+
+            & > :last-child::after {
+                display: none;
+                content: "" !important;
+            }
+        }
+
+        .psp-text-field__input + label {
+            width: 0px;
+            height: var(--column--height, auto);
+            line-height: 17px;
+            box-sizing: border-box;
+            font-weight: 300;
+            color: var(--inactive--color, #B4B7BE);
+            white-space: nowrap;
+            padding: var(--column-drop-container--padding, 0px 0px 2px 10px);
+            font-size: 12px;
+            display: inline-block;
+            // TODO animate?
+            // transition: font-size 0.3s, margin 0.3s;
+        }
+
+        .dropping .psp-text-field__input,
+        .psp-text-field__input:not(:empty) {
+            display: block !important;
+        }
+
+        .dropping .psp-text-field__input::after {
+            content: "|";
+            width: 0px;
+            overflow: visible;
+            margin-top: -1px;
+            position: absolute;
+        }
+
+        .dropping * {
+            pointer-events: none;
+        }
+
+        .dropping .psp-text-field label,
+        .psp-text-field__input:not(:empty) + label {
+            position: absolute;
+            top: 0px;
+            margin: var(--column-drop-label--margin, 0);
+            font-size: var(--column-drop-label--font-size, 12px);
+            display: var(--column-drop-label--display, none);
+        }
+
+        #transpose_button {
+            cursor: pointer;
+            min-width: 5px;
+            max-width: 5px;
+            flex-grow: 0;
+            color: var(--inactive--color, inherit);
+            font-family: Arial;
+            font-size: 12px;
+            user-select: none;
+            &:hover {
+                color: var(--active--color, inherit);
+            }
+        }
+    }
+
+    .sort-icon {
+        font-family: "Material Icons";
+
+        &.desc:before {
+            content: var(--sort-order-desc--before, "\2193");
+        }
+
+        &.asc:before {
+            content: var(--sort-order-asc--before, "\2191");
+        }
+
+        &.none:before {
+            content: var(--sort-order-none--before, "-");
+        }
+
+        &.asc.abs:before {
+            content: var(--sort-order-asc-abs--before, "\21E7");
+        }
+
+        &.desc.abs:before {
+            content: var(--sort-order-desc-abs--before, "\21E9");
+        }
+
+        &.col.asc:before {
+            content: var(--sort-order-col-asc--before, "\2192");
+        }
+
+        &.col.desc:before {
+            content: var(--sort-order-col-desc--before, "\2190");
+        }
+
+        &.col.asc.abs:before {
+            content: var(--sort-order-col-asc-abs--before, "\21E8");
+        }
+
+        &.col.desc.abs:before {
+            content: var(--sort-order-col-desc-abs--before, "\21E6");
+        }
+    }
+}

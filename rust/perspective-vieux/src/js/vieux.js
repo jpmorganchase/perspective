@@ -8,8 +8,8 @@
  *
  */
 
-import init, * as internal from "../../pkg/perspective_vieux.js";
-import wasm_internal from "../../pkg/perspective_vieux_bg.wasm";
+import init, * as internal from "../pkg/perspective_viewer.js";
+import wasm_internal from "../pkg/perspective_viewer_bg.wasm";
 
 export const wasm = init(wasm_internal).then(() => {
     internal.set_panic_hook();
@@ -24,13 +24,6 @@ async function _await_index(f) {
     }
     return f();
 }
-
-// function handle_view_errors(e) {
-//     if (e.message !== "View is not initialized") {
-//         throw e;
-//     }
-// }
-
 class PerspectiveVieuxElement extends HTMLElement {
     constructor() {
         super();
@@ -49,7 +42,7 @@ class PerspectiveVieuxElement extends HTMLElement {
         _await_index(() => this._instance.js_load(table));
     }
 
-    resize() {
+    notifyResize() {
         return _await_index(() => this._instance.js_resize());
     }
 
@@ -59,6 +52,10 @@ class PerspectiveVieuxElement extends HTMLElement {
 
     restore(...args) {
         return _await_index(() => this._instance.js_restore(...args));
+    }
+
+    save(...args) {
+        return _await_index(() => this._instance.js_save(...args));
     }
 
     delete() {
@@ -71,6 +68,10 @@ class PerspectiveVieuxElement extends HTMLElement {
 
     copy(...args) {
         return _await_index(() => this._instance.js_copy(...args));
+    }
+
+    getEditPort() {
+        return _await_index(() => console.error("Not Implemented"));
     }
 
     setThrottle(...args) {
@@ -98,8 +99,8 @@ class PerspectiveVieuxElement extends HTMLElement {
     }
 }
 
-if (document.createElement("perspective-vieux").constructor === HTMLElement) {
-    window.customElements.define("perspective-vieux", PerspectiveVieuxElement);
+if (document.createElement("perspective-viewer").constructor === HTMLElement) {
+    window.customElements.define("perspective-viewer", PerspectiveVieuxElement);
 }
 
 class PerspectiveColumnStyleElement extends HTMLElement {

@@ -8,7 +8,7 @@
  */
 
 import "./polyfills/index";
-import {registerPlugin} from "@finos/perspective-viewer/src/js/utils.js";
+
 import charts from "../charts/charts";
 import {initialiseStyles} from "../series/colorStyles";
 import style from "../../less/chart.less";
@@ -113,7 +113,7 @@ export function register(...plugins) {
                         } else {
                             jsonp = view.to_json({leaves_only});
                         }
-                        metadata = await Promise.all([viewer._table.schema(false), view.expression_schema(false), view.schema(false), jsonp, view.get_config()]);
+                        metadata = await Promise.all([viewer.getTable().then(x => x.schema(false)), view.expression_schema(false), view.schema(false), jsonp, view.get_config()]);
 
                         let [table_schema, expression_schema, view_schema, json, config] = metadata;
 
@@ -245,7 +245,7 @@ export function register(...plugins) {
                 }
             );
 
-            registerPlugin(plugin_name);
+            window.registerPlugin(plugin_name);
         }
     });
 }

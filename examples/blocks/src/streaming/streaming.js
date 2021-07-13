@@ -32,30 +32,31 @@ window.addEventListener("DOMContentLoaded", async function() {
     });
 
     // Load the `table` in the `<perspective-viewer>` DOM reference.
-    elem.load(table);
-    elem.restore({
-        plugin: "Datagrid",
-        columns: ["(-)chg", "chg", "(+)chg"],
-        expressions: ['//(-)chg\nif("chg"<0){"chg"}else{0}', '//(+)chg\nif("chg">0){"chg"}else{0}'],
-        "row-pivots": ["name"],
-        "column-pivots": ["client"],
-        aggregates: {"(-)chg": "avg", "(+)chg": "avg", chg: "avg"},
-        sort: [["chg", "desc"]],
-        plugin_config: {
-            "(-)chg": {
-                color_mode: "bar",
-                gradient: 10
-            },
-            "(+)chg": {
-                color_mode: "bar",
-                gradient: 10
-            },
-            chg: {
-                color_mode: "gradient",
-                gradient: 10
-            }
-        }
-    });
+    await elem.load(Promise.resolve(table));
+    // await new Promise(x => setTimeout(x, 5000));
+    // elem.restore({
+    //     plugin: "Datagrid",
+    //     columns: ["(-)chg", "chg", "(+)chg"],
+    //     expressions: ['//(-)chg\nif("chg"<0){"chg"}else{0}', '//(+)chg\nif("chg">0){"chg"}else{0}'],
+    //     "row-pivots": ["name"],
+    //     "column-pivots": ["client"],
+    //     aggregates: {"(-)chg": "avg", "(+)chg": "avg", chg: "avg"},
+    //     sort: [["chg", "desc"]],
+    //     plugin_config: {
+    //         "(-)chg": {
+    //             color_mode: "bar",
+    //             gradient: 10
+    //         },
+    //         "(+)chg": {
+    //             color_mode: "bar",
+    //             gradient: 10
+    //         },
+    //         chg: {
+    //             color_mode: "gradient",
+    //             gradient: 10
+    //         }
+    //     }
+    // });
 
     // Add more rows every 50ms using the `update()` method on the `table` directly.
     (function postRow() {

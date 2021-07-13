@@ -13,6 +13,7 @@
 pub mod components;
 pub mod config;
 pub mod custom_elements;
+pub mod dragdrop;
 pub mod exprtk;
 pub mod js;
 pub mod renderer;

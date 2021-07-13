@@ -1,5 +1,5 @@
 {
-    "name": "@finos/perspective-viewer",
+    "name": "@finos/OLD-perspective-viewer",
     "version": "0.10.0",
     "description": "Perspective.js",
     "main": "dist/esm/viewer.js",
@@ -66,7 +66,6 @@
     },
     "devDependencies": {
         "@finos/perspective-test": "^0.10.0",
-        "@finos/perspective-vieux": "^0.10.0",
         "jsverify": "^0.8.4"
     }
 }

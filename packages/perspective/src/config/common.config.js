@@ -3,7 +3,7 @@ const cssnano = require("cssnano");
 const TerserPlugin = require("terser-webpack-plugin");
 const plugins = [];
 
-function common({no_minify, inline} = {}) {
+function common({no_minify, inline = false} = {}) {
     return {
         mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG || no_minify ? "development" : process.env.NODE_ENV || "production",
         plugins: plugins,
@@ -44,8 +44,17 @@ function common({no_minify, inline} = {}) {
                 },
                 {
                     test: /\.js$/,
-                    exclude: /node_modules\/(?!regular-table)/,
-                    loader: "source-map-loader"
+                    exclude: /(node_modules\/(?!regular-table)|index\.js)/,
+                    use: [
+                        {loader: "source-map-loader"},
+                        {
+                            loader: "string-replace-loader",
+                            options: {
+                                search: /webpackMode:\s*?"eager"/g,
+                                replace: ""
+                            }
+                        }
+                    ]
                 },
                 {
                     test: /\.(arrow)$/,
@@ -81,7 +90,7 @@ function common({no_minify, inline} = {}) {
                     test: /\.ttf$/,
                     use: ["file-loader"]
                 },
-                inline
+                false
                     ? {
                           test: /\.wasm$/,
                           type: "javascript/auto",
@@ -96,18 +105,18 @@ function common({no_minify, inline} = {}) {
                 {
                     test: /perspective\.worker\.js$/,
                     type: "javascript/auto",
-                    loader: "worker-loader",
-                    options: {
-                        inline: "no-fallback"
-                    }
+                    loader: "worker-loader"
+                    // options: {
+                    //     inline: "no-fallback"
+                    // }
                 },
                 {
                     test: /editor\.worker/,
                     type: "javascript/auto",
-                    loader: "worker-loader",
-                    options: {
-                        inline: "no-fallback"
-                    }
+                    loader: "worker-loader"
+                    // options: {
+                    //     inline: "no-fallback"
+                    // }
                 }
             ]
         },
@@ -118,6 +127,7 @@ function common({no_minify, inline} = {}) {
         },
         devtool: "source-map",
         optimization: {
+            chunkIds: "deterministic",
             minimizer: [
                 new TerserPlugin({
                     terserOptions: {

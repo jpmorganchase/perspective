@@ -64,7 +64,11 @@ impl Renderer {
         })))
     }
 
-    pub fn reset(&self) -> Result<(), JsValue> {
+    pub fn reset(&self) {
+        self.0.borrow_mut().plugins_idx = None;
+    }
+
+    pub fn delete(&self) -> Result<(), JsValue> {
         self.get_active_plugin()?.delete();
         Ok(())
     }
@@ -246,8 +250,8 @@ impl Renderer {
                     .0
                     .borrow()
                     .vieux_elem
-                    .query_selector("[slot=main_panel]")
-                    .unwrap()
+                    .children()
+                    .item(0)
                     .unwrap()
                     .unchecked_into();
                 let new_width =

@@ -1,0 +1,123 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "../less/fonts";
+@import "../less/variables";
+@import (reference) "material";
+
+perspective-column-style, perspective-expression-editor {
+    background-color: @grey700;
+    color: #FFFFFF;
+    border: 1px solid @grey500;
+    --input--border-color: @grey500;
+    --active-color: #2770a9;
+    --inactive-color: @grey500;
+}
+
+perspective-viewer, .perspective-viewer-material-dark {
+    .perspective-viewer-material-base();
+    background-color: @grey800;
+    color: white;
+
+    --background-color: @grey800;
+    --column--background: @grey800;
+    --null--background: rgba(0,0,0,8%);
+    --color: white;
+    --plugin--background: @grey700;
+    --select--background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA0LjkgMTAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDQuOSAxMDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiM0NDQ0NDQ7fQo8L3N0eWxlPgo8dGl0bGU+YXJyb3dzPC90aXRsZT4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIxLjQsNC43IDIuNSwzLjIgMy41LDQuNyAiLz4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIzLjUsNS4zIDIuNSw2LjggMS40LDUuMyAiLz4KPC9zdmc+Cg==) no-repeat 95% 50%;
+    --select--background-color: @grey800;
+    --inactive--color: @grey500;
+    --pv-divider--color: @grey500;
+    --active--background: rgba(39, 113, 170, 0.5);
+    --active--color: #2770a9;
+    --float--column-type--color: @blue50;
+    --string--column-type--color: @red50;
+    --expression--operator-color: @grey60;
+    --expression--function-color: @lightblue600;
+    --expression--error-color: rgb(255, 136, 136);
+    --input-dragover--background: linear-gradient(to top, rgbs(38, 112, 169, 0.5), transparent 50%);
+    --monaco-theme: vs-dark;
+
+    table {
+        color: white;
+    }
+
+    table tr:hover {
+        color: white;
+    }
+
+    regular-table {
+        --rt-pos-cell--color: @blue50;
+        --rt-neg-cell--color: @red50;
+        table tbody tr {
+            td, th {
+                --rt-hover--border-color: @grey200;
+                border-top-color: @grey500;
+            }
+        }
+    }
+
+    --scrollbar--background-color: @grey500;
+
+    regular-table::-webkit-scrollbar-thumb {
+        background-color: @grey500;
+    }
+
+
+    tbody th:empty {
+        background: linear-gradient(to right, transparent 9px, @grey500 10px, transparent 11px);
+        background-repeat: no-repeat;
+        background-position: 0px -10px;
+    }
+
+    --d3fc-legend--text: @grey60;
+    --d3fc-treedata--labels: white;
+    --d3fc-treedata--hover-highlight: white;
+    --d3fc-axis--ticks: @grey60;
+    --d3fc-axis--lines: @grey200;
+    --d3fc-gridline--color:  @grey500;
+    --d3fc-tooltip--background: rgba(42,44,47,1.0);
+    --d3fc-tooltip--color: white;
+    --d3fc-tooltip--border-color: @grey800;
+    --d3fc-legend--background: rgba(42,44,47,0.8);
+
+    --d3fc-series: rgb(71, 120, 194);
+    --d3fc-series-1: rgb(71, 120, 194);
+    --d3fc-series-2: rgb(204, 120, 48);
+    --d3fc-series-3: rgb(158, 84, 192);
+    --d3fc-series-4: rgb(51, 150, 153);
+    --d3fc-series-5: rgb(102, 114, 143);
+    --d3fc-series-6: rgb(211, 103, 189);
+    --d3fc-series-7: rgb(109, 124, 77);
+    --d3fc-series-8: rgb(221, 99, 103);
+    --d3fc-series-9: rgb(120, 104, 206);
+    --d3fc-series-10: rgb(23, 166, 123);
+  
+    --d3fc-full--gradient: linear-gradient(
+        #dd6367 0%,
+        #242526 50%,
+        #3289c8 100%
+    );
+  
+    --d3fc-positive--gradient: linear-gradient(
+        #242526 0%,
+        #3289c8 100%
+    );
+  
+    --d3fc-negative--gradient: linear-gradient(
+        #dd6367 0%,
+        #242526 100%
+    );
+
+    --warning--color: #333;
+
+    // Autocomplete
+    --autocomplete-select-background: #555;
+    --autocomplete-hover-background: #444;
+}

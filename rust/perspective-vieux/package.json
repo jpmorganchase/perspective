@@ -1,5 +1,5 @@
 {
-    "name": "@finos/perspective-vieux",
+    "name": "@finos/perspective-viewer",
     "version": "0.10.0",
     "private": true,
     "description": "A regular `<table>`, for an async and virtual data model.",
@@ -17,9 +17,14 @@
         "src/**/*"
     ],
     "scripts": {
-        "build:wasm": "wasm-pack build --target web",
+        "build:wasm": "wasm-pack build --out-dir dist/pkg --target web && rm dist/pkg/package.json",
         "build:rollup": "rollup --config rollup.config.js",
-        "build": "npm-run-all build:rollup build:wasm && cpx 'src/less/*' dist/less",
+        "build:webpack": "webpack --color --config webpack.config.js",
+        "build": "npm-run-all build:rollup build:wasm build:webpack && cpx 'src/less/*' dist/less",
+        "watch:wasm": "cargo watch -i .gitignore -i \"pkg/*\" -i \"src/js/*\" -s \"yarn build:wasm\"",
+        "watch:rollup": "rollup --watch --config rollup.config.js",
+        "watch:webpack": "webpack --watch --color --config webpack.config.js",
+        "watch": "npm-run-all -p watch:rollup watch:wasm watch:webpack",
         "postbuild": "rimraf pkg/package.json pkg/.gitignore",
         "clean": "rimraf dist && rimraf pkg && rimraf target",
         "fix": "yarn lint --fix",
@@ -34,6 +39,9 @@
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "^0.10.0"
+        "@finos/perspective": "^0.10.0",
+        "mobile-drag-drop": "^2.3.0-rc.2",
+        "monaco-editor": "0.24.0",
+        "monaco-editor-webpack-plugin": "3.1.0"
     }
 }

@@ -50,7 +50,7 @@
         function on_load() {
             var el = document.getElementsByTagName('perspective-viewer')[0];
             WORKER.table(this.response).then(table => {
-                el.load(table);
+                el.load(Promise.resolve(table));
                 el.toggleConfig();
             });
         }

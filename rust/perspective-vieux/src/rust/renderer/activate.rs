@@ -19,20 +19,14 @@ use web_sys::*;
 /// and the opacity is set back to 1.
 ///
 /// # Arguments
-/// - `elem` the root `<perspective-vieux>` element.
+/// - `viewer` the root `<perspective-viewer>` element.
 /// - `plugin` the plugin custom element.
 /// - `task` an async task which renders the plugin.
 pub async fn activate_plugin(
-    elem: &HtmlElement,
+    viewer: &HtmlElement,
     plugin: &JsPerspectiveViewerPlugin,
     task: impl Future<Output = Result<JsValue, JsValue>>,
 ) -> Result<JsValue, JsValue> {
-    let elem = elem.parent_node().unwrap();
-    let viewer = elem
-        .get_root_node()
-        .unchecked_into::<web_sys::ShadowRoot>()
-        .host();
-
     let html_plugin = plugin.unchecked_ref::<HtmlElement>();
     if html_plugin.parent_node().is_none() {
         html_plugin.style().set_property("opacity", "0")?;

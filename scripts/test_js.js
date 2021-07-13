@@ -115,16 +115,16 @@ try {
         execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
         execute`yarn --silent clean --screenshots`;
 
-        if (!PACKAGE || minimatch("perspective-vieux", PACKAGE)) {
+        if (!PACKAGE || minimatch("perspective-viewer", PACKAGE)) {
             console.log("-- Running Rust tests");
-            execute`yarn lerna --scope=@finos/perspective-vieux exec yarn test`;
+            execute`yarn lerna --scope=@finos/perspective-viewer exec yarn test`;
         }
 
         execute`${docker("puppeteer")} node scripts/test_js.js --private-puppeteer ${getarg()}`;
     } else {
-        if (!IS_INSIDE_PUPPETEER && (!PACKAGE || minimatch("perspective-vieux", PACKAGE))) {
+        if (!IS_INSIDE_PUPPETEER && (!PACKAGE || minimatch("perspective-viewer", PACKAGE))) {
             console.log("-- Running Rust tests");
-            execute`yarn lerna --scope=@finos/perspective-vieux exec yarn test`;
+            execute`yarn lerna --scope=@finos/perspective-viewer exec yarn test`;
         }
 
         if (IS_LOCAL_PUPPETEER) {

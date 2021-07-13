@@ -117,13 +117,14 @@ pub fn test_plugin_selected() {
     };
 
     let plugin_selector = link.borrow().clone().unwrap();
-    plugin_selector
-        .send_message(PluginSelectorMsg::PluginSelected("Debug B".to_owned()));
+    plugin_selector.send_message(PluginSelectorMsg::ComponentSelectPlugin(
+        "Debug B".to_owned(),
+    ));
 
     assert_eq!(
         result.borrow().as_ref().map(|x| x.name()),
-        Some("Debug A".to_owned())
+        Some("Debug B".to_owned())
     );
 
-    assert_eq!(renderer.get_active_plugin().unwrap().name(), "Debug A");
+    assert_eq!(renderer.get_active_plugin().unwrap().name(), "Debug B");
 }

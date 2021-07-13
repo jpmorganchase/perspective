@@ -8,7 +8,10 @@
 
 use crate::js::perspective::JsPerspectiveViewConfig;
 use crate::utils::*;
-use std::fmt::Display;
+
+use super::aggregates::*;
+use super::filters::*;
+use super::sort::*;
 
 use serde::Deserialize;
 use serde::Serialize;
@@ -22,229 +25,24 @@ use {crate::*, js_sys::Array, std::iter::FromIterator};
 #[cfg(test)]
 use wasm_bindgen_test::*;
 
-#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
-#[serde(untagged)]
-pub enum Scalar {
-    Float(f64),
-    String(String),
-    Bool(bool),
-    DateTime(u64),
-    Null,
-    // // Can only have one u64 representation ...
-    // Date(u64)
-    // Int(u32)
-}
-
-#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
-#[serde()]
-pub enum FilterOp {
-    #[serde(rename = "contains")]
-    Contains,
-
-    #[serde(rename = "in")]
-    In,
-
-    #[serde(rename = "begins with")]
-    BeginsWith,
-
-    #[serde(rename = "ends with")]
-    EndsWith,
-
-    #[serde(rename = "is null")]
-    IsNull,
-
-    #[serde(rename = "is not null")]
-    IsNotNull,
-
-    #[serde(rename = ">")]
-    GT,
-
-    #[serde(rename = "<")]
-    LT,
-
-    #[serde(rename = "==")]
-    EQ,
-
-    #[serde(rename = ">=")]
-    GTE,
-
-    #[serde(rename = "<=")]
-    LTE,
-
-    #[serde(rename = "!=")]
-    NE,
-}
-
-#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
-#[serde()]
-pub enum SortDir {
-    #[serde(rename = "none")]
-    None,
-
-    #[serde(rename = "desc")]
-    Desc,
-
-    #[serde(rename = "asc")]
-    Asc,
-
-    #[serde(rename = "col desc")]
-    ColDesc,
-
-    #[serde(rename = "col asc")]
-    ColAsc,
-
-    #[serde(rename = "desc abs")]
-    DescAbs,
-
-    #[serde(rename = "asc abs")]
-    AscAbs,
-
-    #[serde(rename = "col desc abs")]
-    ColDescAbs,
-
-    #[serde(rename = "col asc abs")]
-    ColAscAbs,
-}
-
-#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
-#[serde()]
-pub struct Filter(String, FilterOp, Scalar);
-
-#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
-#[serde()]
-pub struct Sort(String, SortDir);
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-#[cfg_attr(test, derive(PartialEq))]
-#[serde()]
-pub enum SingleAggregate {
-    #[serde(rename = "sum")]
-    Sum,
-
-    #[serde(rename = "sum abs")]
-    SumAbs,
-
-    #[serde(rename = "sum not null")]
-    SumNotNull,
-
-    #[serde(rename = "abs sum")]
-    AbsSum,
-
-    #[serde(rename = "pct sum parent")]
-    PctSumParent,
-
-    #[serde(rename = "pct sum grand total")]
-    PctSumGrandTotal,
-
-    #[serde(rename = "any")]
-    Any,
-
-    #[serde(rename = "unique")]
-    Unique,
-
-    #[serde(rename = "dominant")]
-    Dominant,
-
-    #[serde(rename = "median")]
-    Median,
-
-    #[serde(rename = "first")]
-    First,
-
-    #[serde(rename = "last by index")]
-    LastByIndex,
-
-    #[serde(rename = "last")]
-    Last,
-
-    #[serde(rename = "count")]
-    Count,
-
-    #[serde(rename = "distinct count")]
-    DistinctCount,
-
-    #[serde(rename = "avg")]
-    Avg,
-
-    #[serde(rename = "mean")]
-    Mean,
-
-    #[serde(rename = "join")]
-    Join,
-
-    #[serde(rename = "high")]
-    High,
-
-    #[serde(rename = "low")]
-    Low,
-}
-
-impl Display for SingleAggregate {
-    fn fmt(
-        &self,
-        fmt: &mut std::fmt::Formatter<'_>,
-    ) -> std::result::Result<(), std::fmt::Error> {
-        for char in format!("{:?}", self).chars() {
-            if char.is_lowercase() {
-                write!(fmt, "{}", char)?;
-            } else {
-                write!(fmt, " {}", char.to_lowercase().next().unwrap())?;
-            }
-        }
-
-        Ok(())
-    }
-}
-
-#[derive(Clone, Deserialize, Serialize)]
-#[cfg_attr(test, derive(Debug, PartialEq))]
-#[serde()]
-pub enum MultiAggregate {
-    #[serde(rename = "weighted mean")]
-    WeightedMean,
-}
-
-#[derive(Clone, Deserialize, Serialize)]
-#[cfg_attr(test, derive(Debug, PartialEq))]
-#[serde(untagged)]
-pub enum Aggregate {
-    SingleAggregate(SingleAggregate),
-    MultiAggregate(MultiAggregate, String),
-}
-
-impl Display for Aggregate {
-    fn fmt(
-        &self,
-        fmt: &mut std::fmt::Formatter<'_>,
-    ) -> std::result::Result<(), std::fmt::Error> {
-        match self {
-            Aggregate::SingleAggregate(x) => write!(fmt, "{}", x)?,
-            Aggregate::MultiAggregate(MultiAggregate::WeightedMean, x) => {
-                write!(fmt, "mean by {}", x)?
-            }
-        };
-        Ok(())
-    }
-}
-
 #[derive(Clone, Deserialize, Default, Serialize)]
 #[cfg_attr(test, derive(Debug, PartialEq))]
 #[serde()]
 pub struct ViewConfig {
     #[serde(default)]
-    row_pivots: Vec<String>,
+    pub row_pivots: Vec<String>,
 
     #[serde(default)]
-    column_pivots: Vec<String>,
+    pub column_pivots: Vec<String>,
 
     #[serde(default)]
-    pub columns: Vec<String>,
+    pub columns: Vec<Option<String>>,
 
     #[serde(default)]
-    filter: Vec<Filter>,
+    pub filter: Vec<Filter>,
 
     #[serde(default)]
-    sort: Vec<Sort>,
+    pub sort: Vec<Sort>,
 
     #[serde(default)]
     pub expressions: Vec<String>,
@@ -274,6 +72,10 @@ impl ViewConfig {
         !self.row_pivots.is_empty() || !self.column_pivots.is_empty()
     }
 
+    pub fn reset(&mut self) {
+        std::mem::swap(self, &mut ViewConfig::default());
+    }
+
     /// Apply `ViewConfigUpdate` to a `ViewConfig`, ignoring any fields in `update`
     /// which were unset.
     pub fn apply_update(&mut self, update: ViewConfigUpdate) -> bool {
@@ -290,30 +92,29 @@ impl ViewConfig {
     }
 }
 
-#[derive(Deserialize)]
-#[cfg_attr(test, derive(Default))]
+#[derive(Deserialize, Default)]
 #[serde()]
 pub struct ViewConfigUpdate {
     #[serde(default)]
-    row_pivots: Option<Vec<String>>,
+    pub row_pivots: Option<Vec<String>>,
 
     #[serde(default)]
-    column_pivots: Option<Vec<String>>,
+    pub column_pivots: Option<Vec<String>>,
 
     #[serde(default)]
-    columns: Option<Vec<String>>,
+    pub columns: Option<Vec<Option<String>>>,
 
     #[serde(default)]
-    filter: Option<Vec<Filter>>,
+    pub filter: Option<Vec<Filter>>,
 
     #[serde(default)]
-    sort: Option<Vec<Sort>>,
+    pub sort: Option<Vec<Sort>>,
 
     #[serde(default)]
-    expressions: Option<Vec<String>>,
+    pub expressions: Option<Vec<String>>,
 
     #[serde(default)]
-    aggregates: Option<HashMap<String, Aggregate>>,
+    pub aggregates: Option<HashMap<String, Aggregate>>,
 }
 
 #[cfg(test)]

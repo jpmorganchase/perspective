@@ -1,0 +1,192 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+:host {
+    #side_panel {
+        & > :not(:last-child) {
+            margin-bottom: 6px;
+        }
+
+        .psp-icon {
+            &:hover {
+                cursor: pointer;
+            }
+        }
+
+        .psp-icon__add {
+            display: flex;
+            width: 20px;
+            min-width: 20px;
+            margin-top: -2px;
+            height: 0px;
+            font-family: var(--column-add--font-family, inherit);
+            &:before {
+                font-feature-settings: "liga";
+                content: var(--column-add--before, "+");
+            }
+        }
+
+        .psp-title__columnName {
+            display: flex;
+            margin-left: 24px;
+            margin-top: 3px;
+            font-size: 12px;
+            font-weight: 300;
+        }
+        #add-expression {
+            padding: 6px 0px;
+            margin: -6px 0 0 0;
+            &.expr_editor_open {
+                background: rgba(0,0,0,0.05);
+            }
+        }
+
+        .side_panel-action:hover {
+            cursor: pointer;
+        }
+
+        .column_selector_column {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            font-size: 12px;
+
+            &:last-child {
+                .column_selector_draggable {
+                    border-color: transparent;
+                }
+            }
+            
+            .column_selector_draggable {
+                min-height: 22px;
+                display: flex;
+                align-items: start;
+                cursor: move;
+                border-style: solid;
+                border-width: 0 0 1px 0;
+                border-color: var(--inactive--color, #C5C9D0);
+                font-size: 12px;
+                flex-grow: 1;
+                color: inherit;
+                transition: height 0.2s;
+                box-sizing: border-box;
+                flex-direction: column;
+                justify-content: space-evenly;
+
+                &.show-aggregate {
+                    min-height: 44px;
+                }
+                
+                .column_name:before {
+                    font-family: var(--interface-monospace--font-family, monospace);
+                    width: var(--column_type--width, auto);
+                    min-width: 18px;
+                    font-size: 12px;
+                    font-weight: 200;
+                    padding: 0 5px 0 0;
+                }
+                
+                .integer:before, .float:before {
+                    content: var(
+                        --float--column-type--content,
+                        var(--column-type--content, "123")
+                    );
+                    color: var(
+                        --float--column-type--color,
+                        var(--column-type--color, #016bc6)
+                    );
+                }
+            
+                .string:before {
+                    content: var(
+                        --string--column-type--content,
+                        var(--column-type--content, "abc")
+                    );
+                    color: var(
+                        --string--column-type--color,
+                        var(--column-type--color, #fe9292)
+                    );
+                }
+            
+                .boolean:before {
+                    content: var(
+                        --boolean--column-type--content,
+                        var(--column-type--content, "t/f")
+                    );
+                    color: var(
+                        --boolean--column-type--color,
+                        var(--column-type--color, #999999)
+                    );
+                }
+            
+                .date:before, .datetime:before {
+                    content: var(
+                        --date--column-type--content,
+                        var(--column-type--content, "mdy")
+                    );
+                    color: var(
+                        --date--column-type--color,
+                        var(--column-type--color, #999999)
+                    );
+                }
+            }
+        }
+
+        .is_column_active {
+            // color: var(--column-selector--color, #999);
+            font-family: var(--column-selector--font-family, Arial) !important;
+            width: var(--column_selector--width, 20px);
+            min-width: var(--column_selector--width, 20px);
+            height: var(--is_visible--height, auto);
+            cursor: var(--is_visible--cursor, pointer);
+            font-size: var(--column_selector--font-size, 14px);
+        }
+
+        #active_columns {
+            .is_column_active {
+                color: var(--active--color, #999);
+                &:before {
+                    content: var(--active-column-selector--content, none);
+                }
+            }
+
+            .column_selector_column {
+                // margin-bottom: 1px;
+                .column_selector_draggable {
+                    width: 100%;
+                }
+            }
+        }
+
+        // Inactive Columns are the columns in the column selector not currently 
+        // selected for the `columns` field of the `ViewConfig`.
+        #inactive_columns {
+            .is_column_active {
+                color: var(--inactive--color, #999);
+                &:before {
+                    content: var(--inactive-column-selector--content, none);
+                }
+            }
+
+            .column_selector_column {
+                opacity: 0.3;
+                transition: opacity 0.3s;
+
+                &:hover {
+                    opacity: 1;
+                    transition: none;
+                }
+
+                .column_selector_draggable {
+                    border-bottom-color: transparent;
+                }
+            }
+        }
+    }
+}

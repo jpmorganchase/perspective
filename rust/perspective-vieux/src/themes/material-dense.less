@@ -1,0 +1,38 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+ @import "../less/fonts";
+ @import (reference) "material";
+
+.perspective-viewer-material-dense-base {
+   --side_panel--padding: 12px 4px 12px 10px;
+   --top_panel--padding: 0px 0px 12px 0px;
+   --column-drop-label--margin: -10px 0px 0px 0px;
+   --column-drop-container--margin: 12px 12px 0px 0px;
+   --column-container--margin: 6px 0px 0px 0px;
+   --row_draggable--animation: none;
+   --button--padding: 12px 9px;
+   --active-column--height: 45px;
+   --column-drop-label--font-size: 8px;
+   --column_selector--width: 24px;
+}
+
+perspective-column-style, perspective-expression-editor {
+   background-color: #FFFFFF;
+   color: #161616;
+   border: 1px solid #E0E4E9;
+   --input--border-color: #E0E4E9;
+   --active-color: @blue500;
+}
+
+perspective-viewer, .perspective-viewer-material-dense {
+   .perspective-viewer-material();
+   .perspective-viewer-material-dense-base();
+}
+ 

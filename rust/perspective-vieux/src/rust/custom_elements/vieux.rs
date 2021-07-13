@@ -9,6 +9,7 @@
 use crate::components::vieux::*;
 use crate::config::*;
 use crate::custom_elements::expression_editor::PerspectiveExpressionEditorElement;
+use crate::dragdrop::*;
 use crate::js::perspective::*;
 use crate::js::perspective_viewer::JsPerspectiveViewerPlugin;
 use crate::renderer::*;
@@ -61,6 +62,7 @@ impl PerspectiveVieuxElement {
             elem: elem.clone(),
             session: session.clone(),
             renderer: renderer.clone(),
+            dragdrop: DragDrop::default(),
             weak_link: WeakComponentLink::default(),
         };
 
@@ -104,20 +106,22 @@ impl PerspectiveVieuxElement {
     /// Loads a promise to a `JsPerspectiveTable` in this viewer.
     pub fn js_load(&self, table: js_sys::Promise) -> js_sys::Promise {
         assert!(!table.is_undefined());
-        let (sender, receiver) = channel::<Result<JsValue, JsValue>>();
-        let root = self.root.clone();
+        let session = self.session.clone();
+        let renderer = self.renderer.clone();
         future_to_promise(async move {
             let promise = JsFuture::from(table).await?;
             let table: JsPerspectiveTable = promise.unchecked_into();
-            root.send_message(Msg::LoadTable(table, sender));
-            receiver.await.to_jserror()?
+            session.reset_stats();
+            session.set_table(table).await?;
+            let update = ViewConfigUpdate::default();
+            session.create_view(update).await?;
+            renderer.draw(async { &session }).await
         })
     }
 
     pub fn js_delete(&self) -> Result<bool, JsValue> {
-        let deleted = self.session.reset();
-        self.renderer.reset()?;
-        Ok(deleted)
+        self.renderer.delete()?;
+        Ok(self.session.delete())
     }
 
     pub fn js_get_table(&self) -> Option<JsPerspectiveTable> {
@@ -143,6 +147,12 @@ impl PerspectiveVieuxElement {
             );
             Ok(session.get_view().as_ref().unwrap().as_jsvalue())
         })
+    }
+
+    pub fn js_save(&self) -> JsPerspectiveViewConfig {
+        JsValue::from_serde(&self.session.get_view_config())
+            .unwrap()
+            .unchecked_into::<JsPerspectiveViewConfig>()
     }
 
     pub fn js_download(&self, flat: bool) -> js_sys::Promise {
