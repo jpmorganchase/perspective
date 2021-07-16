@@ -55,3 +55,10 @@ library, Perspective provides both:
 * [`perspective-viewer-maps` OpenLayers/OpenStreetMap plugin](https://github.com/DevAndyLee/perspective-viewer-maps)
 * [Scott Logic / Perspective Plugin API - How to build a new plugin](https://blog.scottlogic.com/2019/04/23/perspective-plugin-api-how-to-build-a-new-plugin.html)
 
+The following organizations support and/or use perspective.
+
+| | | | |
+|:--:|:--:|:--:|:--:|
+|<img width="150" src="./docs/static/img/jpmorgan.png" alt="J.P. Morgan"></img>|<img width="150" src="./docs/static/img/scottlogic.jpg" alt="Scott Logic"></img>|<img width="150" src="./docs/static/img/rbc.jpg" alt="RBC Capital Markets"></img>|<img width="150" src="./docs/static/img/iex.png" alt="IEX"></img>|
+| [J.P. Morgan](https://www.jpmorgan.com/) | [Scott Logic](https://www.scottlogic.com/) | [RBC Capital Markets](https://www.rbc.com/) | [IEX](https://iextrading.com/) |
+
