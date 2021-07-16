@@ -50,6 +50,7 @@ const double PSP_TABLE_GROW_RATIO = 1.3;
 const t_index INVALID_INDEX = -1;
 
 #ifdef PSP_PARALLEL_FOR
+#define TBB_SUPPRESS_DEPRECATED_MESSAGES 1
 #define PSP_PSORT tbb::parallel_sort
 #else
 #define PSP_PSORT std::sort
