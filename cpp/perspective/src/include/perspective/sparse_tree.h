@@ -198,7 +198,17 @@ public:
         const std::set<t_uindex>& ptiset, const std::vector<t_uindex>& zero_strands) const;
 
     t_uindex get_parent_idx(t_uindex idx) const;
+
     std::vector<t_uindex> get_ancestry(t_uindex idx) const;
+
+    /**
+     * @brief Given a node index on the tree, return how many nodes it has
+     * between itself and its root parent.
+     * 
+     * @param idx 
+     * @return t_uindex 
+     */
+    t_uindex get_ancestry_count(t_uindex idx) const;
 
     t_index get_sibling_idx(t_index p_ptidx, t_index p_nchild, t_uindex c_ptidx) const;
     t_uindex get_aggidx(t_uindex idx) const;
@@ -210,6 +220,22 @@ public:
     t_tnode get_node(t_uindex idx) const;
 
     void get_path(t_uindex idx, std::vector<t_tscalar>& path) const;
+
+    /**
+     * @brief Returns flattened, null-padded row paths for the given vector of
+     * row indices. Thus, row pivots of ["Region", "State", "City"] returns
+     * [
+     *  ["South", null, null],
+     *  [null, "Texas", null],
+     *  [null, null, "Houston"]
+     * ]
+     * 
+     * @param row_indices
+     */
+    std::vector<std::vector<t_tscalar>> get_paths(const std::vector<t_index>& row_indices) const;
+
+    std::vector<std::vector<t_tscalar>> get_paths_by_pivots(t_index num_rows) const;
+
     void get_sortby_path(t_uindex idx, std::vector<t_tscalar>& path) const;
 
     t_uindex resolve_child(t_uindex root, const t_tscalar& datum) const;

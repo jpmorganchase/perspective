@@ -44,7 +44,8 @@ namespace apachearrow {
     /**
      * @brief Retrieve the correct index into the data slice for the given
      * column and row. This is a redefinition of the method in `t_data_slice`,
-     * except it does not rely on any instance variables.
+     * except it does not rely on any instance variables as we don't use the
+     * `t_data_slice` instance, instead accessing the its data vector directly.
      * 
      * @param cidx 
      * @param ridx 
@@ -61,9 +62,14 @@ namespace apachearrow {
     /**
      * @brief Build an `arrow::Array` from a column typed as `DTYPE_BOOL.`
      * 
-     * @param data 
-     * @param offset 
-     * @param stride 
+     * @param data a vector of scalars to write into an arrow array.
+     * @param cidx the index of the column in the dataset, used to calculate
+     *      the physical offset of the column's data in `data`, a tightly packed
+     *      vector containing the dataset for the entire data slice.
+     * @param stride the number of columns present in the data slice, used to
+     *      calculate the data's physical offset.
+     * @param extents the start/end rows and columns of the data slice, used
+     *      to calculate the data's physical offset.
      */
     std::shared_ptr<arrow::Array>
     boolean_col_to_array(
@@ -78,9 +84,14 @@ namespace apachearrow {
      * `uint32_t` that needs to be written into the `arrow::Array` as an
      * `int32_t`.
      *
-     * @param data 
-     * @param offset 
-     * @param stride 
+     * @param data a vector of scalars to write into an arrow array.
+     * @param cidx the index of the column in the dataset, used to calculate
+     *      the physical offset of the column's data in `data`, a tightly packed
+     *      vector containing the dataset for the entire data slice.
+     * @param stride the number of columns present in the data slice, used to
+     *      calculate the data's physical offset.
+     * @param extents the start/end rows and columns of the data slice, used
+     *      to calculate the data's physical offset.
      */
     std::shared_ptr<arrow::Array>
     date_col_to_array(
@@ -94,9 +105,14 @@ namespace apachearrow {
      * Separated out from the main templated `col_to_array` as
      * `arrow::timestamp()` has parameters that need to be filled.
      *
-     * @param data 
-     * @param offset 
-     * @param stride 
+     * @param data a vector of scalars to write into an arrow array.
+     * @param cidx the index of the column in the dataset, used to calculate
+     *      the physical offset of the column's data in `data`, a tightly packed
+     *      vector containing the dataset for the entire data slice.
+     * @param stride the number of columns present in the data slice, used to
+     *      calculate the data's physical offset.
+     * @param extents the start/end rows and columns of the data slice, used
+     *      to calculate the data's physical offset.
      */
     std::shared_ptr<arrow::Array>
     timestamp_col_to_array(
@@ -108,11 +124,15 @@ namespace apachearrow {
     /**
      * @brief Build an `arrow::Array` from a column typed as `DTYPE_STR`, using
      * arrow's `DictionaryArray` constructors.
-     * 
-     * @param data 
-     * @param offset 
-     * @param stride 
-     * @return std::shared_ptr<arrow::Array> 
+     *
+     * @param data a vector of scalars to write into an arrow array.
+     * @param cidx the index of the column in the dataset, used to calculate
+     *      the physical offset of the column's data in `data`, a tightly packed
+     *      vector containing the dataset for the entire data slice.
+     * @param stride the number of columns present in the data slice, used to
+     *      calculate the data's physical offset.
+     * @param extents the start/end rows and columns of the data slice, used
+     *      to calculate the data's physical offset.
      */
     std::shared_ptr<arrow::Array>
     string_col_to_dictionary_array(
@@ -127,11 +147,17 @@ namespace apachearrow {
      * slice, as `t_data_slice` is templated on the context type and we'd like
      * to avoid template hell.
      *
-     * @tparam ArrowDataType
-     * @param data 
-     * @param offset 
-     * @param stride 
-     * @return std::shared_ptr<arrow::Array> 
+     * @tparam ArrowDataType 
+     * @tparam ArrowValueType
+     *
+     * @param data a vector of scalars to write into an arrow array.
+     * @param cidx the index of the column in the dataset, used to calculate
+     *      the physical offset of the column's data in `data`, a tightly packed
+     *      vector containing the dataset for the entire data slice.
+     * @param stride the number of columns present in the data slice, used to
+     *      calculate the data's physical offset.
+     * @param extents the start/end rows and columns of the data slice, used
+     *      to calculate the data's physical offset.
      */
     template <typename ArrowDataType, typename ArrowValueType>
     std::shared_ptr<arrow::Array>

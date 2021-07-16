@@ -548,6 +548,28 @@ module.exports = perspective => {
                 table.update(partial_change_y);
             });
 
+            it("returns changed rows, multilevel pivot", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    row_pivots: ["y", "z"],
+                    aggregates: {y: "distinct count", z: "distinct count"}
+                });
+                view.on_update(
+                    async function(updated) {
+                        const expected = [
+                            {x: 1, y: 1, z: 1},
+                            {x: 2, y: 1, z: 1}
+                        ];
+                        await match_delta(perspective, updated.delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update(partial_change_y);
+            });
+
             it("returns nothing when updated data is not in pivot", async function(done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
@@ -566,10 +588,51 @@ module.exports = perspective => {
                 table.update(partial_change_z);
             });
 
+            it("returns nothing when updated data is not in pivot, multilevel", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    row_pivots: ["y", "x"],
+                    aggregates: {y: "distinct count", z: "distinct count"}
+                });
+                view.on_update(
+                    async function(updated) {
+                        await match_delta(perspective, updated.delta, []);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update(partial_change_z);
+            });
+
             it("returns added rows", async function(done) {
                 let table = await perspective.table(data);
                 let view = await table.view({
                     row_pivots: ["y"],
+                    aggregates: {y: "distinct count", z: "distinct count"}
+                });
+                view.on_update(
+                    async function(updated) {
+                        const expected = [
+                            {x: 13, y: 6, z: 3},
+                            {x: 1, y: 1, z: 1},
+                            {x: 2, y: 1, z: 1}
+                        ];
+                        await match_delta(perspective, updated.delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update(partial_change_y);
+            });
+
+            it("returns added rows, multilevel pivot", async function(done) {
+                let table = perspective.table(data);
+                let view = table.view({
+                    row_pivots: ["y", "z"],
                     aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(
@@ -612,10 +675,56 @@ module.exports = perspective => {
                 ]);
             });
 
+            it("returns deleted columns, multilevel", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    row_pivots: ["y", "z"],
+                    aggregates: {y: "distinct count", z: "distinct count"}
+                });
+                view.on_update(
+                    async function(updated) {
+                        // underlying data changes, but only total aggregate row is affected
+                        const expected = [{x: 10, y: 3, z: 2}];
+                        await match_delta(perspective, updated.delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update([
+                    {x: 1, y: null},
+                    {x: 4, y: null}
+                ]);
+            });
+
             it("returns changed rows in non-sequential update", async function(done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
                     row_pivots: ["y"],
+                    aggregates: {y: "distinct count", z: "distinct count"}
+                });
+                view.on_update(
+                    async function(updated) {
+                        // aggregates are sorted, in this case by string comparator - "string1" and "string2" are at the end
+                        const expected = [
+                            {x: 1, y: 1, z: 1},
+                            {x: 4, y: 1, z: 1}
+                        ];
+                        await match_delta(perspective, updated.delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update(partial_change_nonseq);
+            });
+
+            it("returns changed rows in non-sequential update, multilevel", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    row_pivots: ["y", "z"],
                     aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(

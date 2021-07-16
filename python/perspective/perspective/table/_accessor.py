@@ -234,7 +234,8 @@ class _PerspectiveAccessor(object):
             return None
 
         elif isinstance(val, list) and len(val) == 1:
-            # strip out values encased lists
+            # strip out values encased in lists, like `__INDEX__` or for
+            # object types.
             val = val[0]
 
         elif dtype == t_dtype.DTYPE_STR:

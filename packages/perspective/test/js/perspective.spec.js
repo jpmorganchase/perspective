@@ -21,6 +21,7 @@ const update_tests = require("./updates.js");
 const filter_tests = require("./filters.js");
 const internal_tests = require("./internal.js");
 const toformat_tests = require("./to_format.js");
+const to_arrow_tests = require("./to_arrow.js");
 const sort_tests = require("./sort.js");
 const multiple_tests = require("./multiple.js");
 const pivot_nulls = require("./pivot_nulls.js");
@@ -38,6 +39,7 @@ describe("perspective.js", function() {
             update_tests(RUNTIMES[mode]);
             filter_tests(RUNTIMES[mode]);
             toformat_tests(RUNTIMES[mode]);
+            to_arrow_tests(RUNTIMES[mode]);
             internal_tests(RUNTIMES[mode], mode);
             sort_tests(RUNTIMES[mode], mode);
             multiple_tests(RUNTIMES[mode], mode);

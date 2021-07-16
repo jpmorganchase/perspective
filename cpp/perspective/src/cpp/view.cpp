@@ -9,7 +9,6 @@
 
 #include <perspective/first.h>
 #include <perspective/view.h>
-#include <perspective/arrow_writer.h>
 #include <sstream>
 
 
@@ -518,8 +517,11 @@ View<t_ctx2>::get_data(
 
 template <typename CTX_T>
 std::shared_ptr<std::string>
-View<CTX_T>::to_arrow(std::int32_t start_row, std::int32_t end_row,
-    std::int32_t start_col, std::int32_t end_col) const {
+View<CTX_T>::to_arrow(
+    std::int32_t start_row,
+    std::int32_t end_row,
+    std::int32_t start_col,
+    std::int32_t end_col) const {
     std::shared_ptr<t_data_slice<CTX_T>> data_slice = get_data(
         start_row, end_row, start_col, end_col
     );
@@ -532,8 +534,11 @@ View<CTX_T>::data_slice_to_arrow(
     std::shared_ptr<t_data_slice<CTX_T>> data_slice) const {
     // From the data slice, get all the metadata we need
     t_get_data_extents extents = data_slice->get_data_extents();
+
     std::int32_t start_col = extents.m_scol;
     std::int32_t end_col = extents.m_ecol;
+
+    // offset = 1 if sides > 0 else 0
     std::int32_t col_offset = data_slice->get_col_offset();
     start_col += col_offset;
 
@@ -546,12 +551,74 @@ View<CTX_T>::data_slice_to_arrow(
 
     std::int32_t num_columns = end_col - start_col;
 
-    if (num_columns > 0) {
+    std::vector<std::vector<t_tscalar>> row_paths;
+
+    if (sides() == 1) {
+        row_paths = get_row_paths(extents.m_srow, extents.m_erow);
+
+        // number of paths, AKA number of row pivots
+        auto num_row_paths = row_paths.size();
+
+        fields.reserve(num_columns + num_row_paths);
+        vectors.reserve(num_columns + num_row_paths);
+
+        // number of rows inside each path, AKA (end row - start row) of the
+        // whole dataset requested.
+        auto row_path_num_rows = extents.m_erow - extents.m_srow;
+
+        // Generate a dummy data extent - num_rows is the same for every
+        // flattened row path, and num_columns is always 1. This allows us
+        // to reuse the column->arrow conversion methods without having to
+        // define a conditional for how to read the data.
+        t_get_data_extents row_path_extents;
+
+        row_path_extents.m_srow = 0;
+        row_path_extents.m_erow = row_path_num_rows;
+        row_path_extents.m_scol = 0;
+        row_path_extents.m_ecol = 1;
+
+        // need table schema and row pivots to get each pivot's dtype
+        const t_schema table_schema = m_table->get_schema();
+
+        // and the context schema as well, if the pivot is a computed col
+        const t_schema ctx_schema = m_ctx->get_schema();
+
+        t_uindex row_path_idx = 0;
+
+        // generate row_path columns
+        for (const std::vector<t_tscalar>& path : row_paths) {
+            const std::string& pivot_name = m_row_pivots[row_path_idx];
+            t_dtype pivot_type;
+
+            if (!table_schema.has_column(pivot_name)) {
+                // TODO: make this more bulletproof, or figure out a cleaner
+                // way to get the dtype of a computed column because it won't
+                // be in the underlying table schema.
+                pivot_type = ctx_schema.get_dtype(pivot_name);
+            } else {
+                pivot_type = table_schema.get_dtype(pivot_name);
+            }
+
+            std::cout << pivot_name << ": " << path << std::endl;
+
+            column_to_arrow(
+                vectors,
+                fields,
+                path,
+                "__ROW_PATH_" + pivot_name + "_" + std::to_string(row_path_idx),
+                pivot_type,
+                0, // 1 column per path vector, always get column at idx 0
+                1, // 1 column per path vector, stride == num_columns
+                extents);
+
+            row_path_idx++;
+        }
+    } else {
         fields.reserve(num_columns);
         vectors.reserve(num_columns);
     }
 
-    for (auto cidx = start_col; cidx < end_col; ++cidx) {
+    for (std::int32_t cidx = start_col; cidx < end_col; ++cidx) {
         std::vector<t_tscalar> col_path = names.at(cidx);
         t_dtype dtype = get_column_dtype(cidx);
 
@@ -566,84 +633,16 @@ View<CTX_T>::data_slice_to_arrow(
 
         std::string name;
 
+        // TODO: 1. emit __INDEX__: need some sort of homogenous list type 
+        // TODO: 2 .emit __ID__
+        // TODO: 3. emit row_path as arrow array
         if (sides() > 1) {
             name = join_column_names(col_path, m_separator);
         } else {
             name = col_path.at(col_path.size() - 1).to_string();
         }
 
-        std::shared_ptr<arrow::Array> arr;
-        switch (dtype) {
-            case DTYPE_INT8: {
-                fields.push_back(arrow::field(name, arrow::int8()));
-                arr = apachearrow::numeric_col_to_array<arrow::Int8Type, std::int8_t>(slice, cidx, stride, extents);
-            } break;
-            case DTYPE_UINT8: {
-                fields.push_back(arrow::field(name, arrow::uint8()));
-                arr = apachearrow::numeric_col_to_array<arrow::UInt8Type, std::uint8_t>(slice, cidx, stride, extents);
-            } break;
-            case DTYPE_INT16: {
-                fields.push_back(arrow::field(name, arrow::int16()));
-                arr = apachearrow::numeric_col_to_array<arrow::Int16Type, std::int16_t>(slice, cidx, stride, extents);
-            } break;
-            case DTYPE_UINT16: {
-                fields.push_back(arrow::field(name, arrow::uint16()));
-                arr = apachearrow::numeric_col_to_array<arrow::UInt16Type, std::uint16_t>(slice, cidx, stride, extents);
-            } break;
-            case DTYPE_INT32: {
-                fields.push_back(arrow::field(name, arrow::int32()));
-                arr = apachearrow::numeric_col_to_array<arrow::Int32Type, std::int32_t>(slice, cidx, stride, extents);
-            } break;
-            case DTYPE_UINT32: {
-                fields.push_back(arrow::field(name, arrow::uint32()));
-                arr = apachearrow::numeric_col_to_array<arrow::UInt32Type, std::uint32_t>(slice, cidx, stride, extents);
-            } break;
-            case DTYPE_INT64: {
-                fields.push_back(arrow::field(name, arrow::int64()));
-                arr = apachearrow::numeric_col_to_array<arrow::Int64Type, std::int64_t>(slice, cidx, stride, extents);
-            } break;
-            case DTYPE_UINT64: {
-                fields.push_back(arrow::field(name, arrow::uint64()));
-                arr = apachearrow::numeric_col_to_array<arrow::UInt64Type, std::uint64_t>(slice, cidx, stride, extents);
-            } break;
-            case DTYPE_FLOAT32: {
-                fields.push_back(arrow::field(name, arrow::float32()));
-                arr = apachearrow::numeric_col_to_array<arrow::FloatType, float>(slice, cidx, stride, extents);
-            } break;
-            case DTYPE_FLOAT64: {
-                fields.push_back(arrow::field(name, arrow::float64()));
-                arr = apachearrow::numeric_col_to_array<arrow::DoubleType, double>(slice, cidx, stride, extents);
-            } break;
-            case DTYPE_DATE: {
-                fields.push_back(arrow::field(name, arrow::date32()));
-                arr = apachearrow::date_col_to_array(slice, cidx, stride, extents);
-            } break;
-            case DTYPE_TIME: {
-                fields.push_back(arrow::field(name, arrow::timestamp(arrow::TimeUnit::MILLI)));
-                arr = apachearrow::timestamp_col_to_array(slice, cidx, stride, extents);
-            } break;
-            case DTYPE_BOOL: {
-                fields.push_back(arrow::field(name, arrow::boolean()));
-                arr = apachearrow::boolean_col_to_array(slice, cidx, stride, extents);
-            } break;
-            case DTYPE_STR: {
-                fields.push_back(arrow::field(name, arrow::dictionary(arrow::int32(), arrow::utf8())));
-                arr = apachearrow::string_col_to_dictionary_array(slice, cidx, stride, extents);
-            } break;
-            case DTYPE_OBJECT: {
-                fields.push_back(arrow::field(name, arrow::uint64()));
-                arr = apachearrow::numeric_col_to_array<arrow::UInt64Type, std::uint64_t>(slice, cidx, stride, extents);
-            } break;
-            default: {
-                std::stringstream ss;
-                ss << "Cannot serialize column `" 
-                   << name << "` of type `"
-                   << get_dtype_descr(dtype)
-                   << "` to Arrow format." << std::endl;
-                PSP_COMPLAIN_AND_ABORT(ss.str());
-            }
-        }
-        vectors.push_back(arr);
+        column_to_arrow(vectors, fields, slice, name, dtype, cidx, stride, extents);
     }
 
     auto arrow_schema = arrow::schema(fields);
@@ -651,6 +650,7 @@ View<CTX_T>::data_slice_to_arrow(
     std::shared_ptr<arrow::RecordBatch> batches = 
         arrow::RecordBatch::Make(arrow_schema, num_rows, vectors);
     auto valid = batches->Validate();
+
     if (!valid.ok()) {
         std::stringstream ss;
         ss << "Invalid RecordBatch: " << valid.message() << std::endl;
@@ -688,6 +688,93 @@ View<CTX_T>::data_slice_to_arrow(
     PSP_CHECK_ARROW_STATUS(writer->WriteRecordBatch(*batches));
     PSP_CHECK_ARROW_STATUS(writer->Close());
     return std::make_shared<std::string>(buffer->ToString());
+}
+
+template <typename CTX_T>
+void
+View<CTX_T>::column_to_arrow(
+    std::vector<std::shared_ptr<arrow::Array>>& arrow_vectors,
+    std::vector<std::shared_ptr<arrow::Field>>& arrow_fields,
+    const std::vector<t_tscalar>& slice,
+    const std::string& column_name,
+    t_dtype column_dtype,
+    t_uindex cidx,
+    t_uindex stride,
+    t_get_data_extents extents) const {
+    std::shared_ptr<arrow::Array> arr;
+
+    switch (column_dtype) {
+        case DTYPE_INT8: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::int8()));
+            arr = apachearrow::numeric_col_to_array<arrow::Int8Type, std::int8_t>(slice, cidx, stride, extents);
+        } break;
+        case DTYPE_UINT8: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::uint8()));
+            arr = apachearrow::numeric_col_to_array<arrow::UInt8Type, std::uint8_t>(slice, cidx, stride, extents);
+        } break;
+        case DTYPE_INT16: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::int16()));
+            arr = apachearrow::numeric_col_to_array<arrow::Int16Type, std::int16_t>(slice, cidx, stride, extents);
+        } break;
+        case DTYPE_UINT16: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::uint16()));
+            arr = apachearrow::numeric_col_to_array<arrow::UInt16Type, std::uint16_t>(slice, cidx, stride, extents);
+        } break;
+        case DTYPE_INT32: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::int32()));
+            arr = apachearrow::numeric_col_to_array<arrow::Int32Type, std::int32_t>(slice, cidx, stride, extents);
+        } break;
+        case DTYPE_UINT32: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::uint32()));
+            arr = apachearrow::numeric_col_to_array<arrow::UInt32Type, std::uint32_t>(slice, cidx, stride, extents);
+        } break;
+        case DTYPE_INT64: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::int64()));
+            arr = apachearrow::numeric_col_to_array<arrow::Int64Type, std::int64_t>(slice, cidx, stride, extents);
+        } break;
+        case DTYPE_UINT64: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::uint64()));
+            arr = apachearrow::numeric_col_to_array<arrow::UInt64Type, std::uint64_t>(slice, cidx, stride, extents);
+        } break;
+        case DTYPE_FLOAT32: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::float32()));
+            arr = apachearrow::numeric_col_to_array<arrow::FloatType, float>(slice, cidx, stride, extents);
+        } break;
+        case DTYPE_FLOAT64: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::float64()));
+            arr = apachearrow::numeric_col_to_array<arrow::DoubleType, double>(slice, cidx, stride, extents);
+        } break;
+        case DTYPE_DATE: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::date32()));
+            arr = apachearrow::date_col_to_array(slice, cidx, stride, extents);
+        } break;
+        case DTYPE_TIME: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::timestamp(arrow::TimeUnit::MILLI)));
+            arr = apachearrow::timestamp_col_to_array(slice, cidx, stride, extents);
+        } break;
+        case DTYPE_BOOL: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::boolean()));
+            arr = apachearrow::boolean_col_to_array(slice, cidx, stride, extents);
+        } break;
+        case DTYPE_STR: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::dictionary(arrow::int32(), arrow::utf8())));
+            arr = apachearrow::string_col_to_dictionary_array(slice, cidx, stride, extents);
+        } break;
+        case DTYPE_OBJECT: {
+            arrow_fields.push_back(arrow::field(column_name, arrow::uint64()));
+            arr = apachearrow::numeric_col_to_array<arrow::UInt64Type, std::uint64_t>(slice, cidx, stride, extents);
+        } break;
+        default: {
+            std::stringstream ss;
+            ss << "Cannot serialize column `" 
+                << column_name << "` of type `"
+                << get_dtype_descr(column_dtype)
+                << "` to Arrow format." << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
+    }
+
+    arrow_vectors.push_back(arr);
 }
 
 // Delta calculation
@@ -849,6 +936,34 @@ template <typename CTX_T>
 std::vector<t_tscalar>
 View<CTX_T>::get_row_path(t_uindex idx) const {
     return m_ctx->unity_get_row_path(idx);
+}
+
+template <>
+std::vector<std::vector<t_tscalar>>
+View<t_ctx0>::get_row_paths(
+    std::int32_t start_row, std::int32_t end_row) const {
+    return std::vector<std::vector<t_tscalar>>();
+}
+
+template <>
+std::vector<std::vector<t_tscalar>>
+View<t_ctxunit>::get_row_paths(
+    std::int32_t start_row, std::int32_t end_row) const {
+    return std::vector<std::vector<t_tscalar>>();
+}
+
+template <>
+std::vector<std::vector<t_tscalar>>
+View<t_ctx1>::get_row_paths(
+    std::int32_t start_row, std::int32_t end_row) const {
+    return m_ctx->get_row_paths(start_row, end_row);
+}
+
+template <>
+std::vector<std::vector<t_tscalar>>
+View<t_ctx2>::get_row_paths(
+    std::int32_t start_row, std::int32_t end_row) const {
+    return std::vector<std::vector<t_tscalar>>();
 }
 
 template <typename CTX_T>
