@@ -80,6 +80,13 @@ const siteConfig = {
     },
     scripts: ["https://buttons.github.io/buttons.js", "js/index.js"],
     stylesheets: [
+        {rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous"},
+        {rel: "preload", href: "https://fonts.gstatic.com/s/materialicons/v92/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2", as: "font", crossOrigin: "anonymous"},
+        {rel: "preload", href: "https://fonts.gstatic.com/s/opensans/v20/mem8YaGs126MiZpBA-UFVZ0bf8pkAg.woff2", as: "font", crossOrigin: "anonymous"},
+        {rel: "preload", href: "https://fonts.gstatic.com/s/opensans/v20/mem5YaGs126MiZpBA-UN_r8OUuhpKKSTjw.woff2", as: "font", crossOrigin: "anonymous"},
+        {rel: "preload", href: "https://fonts.gstatic.com/s/robotomono/v13/L0xTDF4xlVMF-BfR8bXMIhJHg45mwgGEFl0_3vvtSM1J-gEPT5Ese09hHSh0me8iUI0.woff2", as: "font", crossOrigin: "anonymous"},
+        {rel: "preload", href: "https://fonts.gstatic.com/s/orbitron/v17/yMJMMIlzdpvBhQQL_SC3X9yhF25-T1nysimBoWg1fDAlp7lk.woff", as: "font", crossOrigin: "anonymous"},
+        {rel: "preload", href: "https://fonts.gstatic.com/s/publicsans/v5/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymuFpmJxAcufVotfzbj.woff", as: "font", crossOrigin: "anonymous"},
         "https://fonts.googleapis.com/css?family=Material+Icons",
         "https://fonts.googleapis.com/css?family=Open+Sans",
         "https://fonts.googleapis.com/css?family=Public+Sans",

@@ -3,6 +3,10 @@ import perspective from "@finos/perspective";
 const worker = perspective.shared_worker();
 
 async function main() {
+    if (window.location.pathname === "/" || window.location.pathname === "/index.html") {
+        return;
+    }
+
     const arrow = await fetch("../../arrow/superstore.arrow");
     const table = await worker.table(await arrow.arrayBuffer());
 

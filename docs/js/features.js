@@ -846,5 +846,17 @@ exports.EXAMPLES = [
             sort: [["Discount", "col asc"]]
         },
         viewport: {width: 600, height: 450}
+    },
+    {
+        name: "Heatmap 4",
+        config: {
+            plugin: "Heatmap",
+            columns: ["Profit"],
+            expressions: ['bucket("Profit", 100)', "bucket(\"Order Date\", 'M')"],
+            "row-pivots": ["bucket(\"Order Date\", 'M')"],
+            "column-pivots": ['bucket("Profit", 100)'],
+            plugin_config: {}
+        },
+        viewport: {width: 600, height: 450}
     }
 ];

@@ -35,8 +35,10 @@ async function run_with_theme(page, is_dark = false) {
     </perspective-viewer>
     <script>
         const WORKER = window.perspective.worker();
-        function on_load() {
+        async function on_load() {
             var el = document.getElementsByTagName('perspective-viewer')[0];
+            const plugin = await el._vieux.get_plugin("Heatmap");
+            plugin.render_warning = false;
             WORKER.table(this.response).then(table => {
                 el.load(table);
                 el.toggleConfig();

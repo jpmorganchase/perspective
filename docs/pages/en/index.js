@@ -90,6 +90,7 @@ class HomeSplash extends React.Component {
                         <Button id="intersect">Treemap</Button>
                         <Button id="pivot">Heatmap</Button>
                     </PromoSection>
+                    <input id="velocity" type="range" class="slider"></input>
                 </div>
             </SplashContainer>
         );
@@ -468,7 +469,7 @@ const ChartTypes = props => {
         return null;
     }
 
-    const showcase_light = Array.from(Array(74).keys()).map((user, i) => {
+    const showcase_light = Array.from(Array(75).keys()).map((user, i) => {
         return (
             <a className="feature" key={i} data-key={i}>
                 <img src={`features/feature_${i}.png`} />
@@ -476,7 +477,7 @@ const ChartTypes = props => {
         );
     });
 
-    const showcase_dark = Array.from(Array(74).keys()).map((user, i) => {
+    const showcase_dark = Array.from(Array(75).keys()).map((user, i) => {
         return (
             <a className="feature" key={i} data-key={i}>
                 <img src={`features/feature_${i}_dark.png`} />

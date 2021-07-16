@@ -11,8 +11,36 @@ import {appendChild} from "domutils";
 import {div} from "prelude-ls";
 import {getEffectiveConstraintOfTypeParameter} from "typescript";
 
-var SECURITIES = ["AAPL.N", "MSFT.N", "AMZN.N", "GOOGL.N", "FB.N", "TSLA.N", "BABA.N", "TSM.N", "V.N", "NVDA.N", "JPM.N", "JNJ.N", "WMT.N", "UNH.N", "MA.N", "BAC.N"];
-var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie"];
+var SECURITIES = [
+    "AAPL.N",
+    "MSFT.N",
+    "AMZN.N",
+    "GOOGL.N",
+    "FB.N",
+    "TSLA.N",
+    "BABA.N",
+    "TSM.N",
+    "V.N",
+    "NVDA.N",
+    "JPM.N",
+    "JNJ.N",
+    "WMT.N",
+    "UNH.N",
+    "MA.N",
+    "BAC.N",
+    "DIS.N",
+    "ASML.N",
+    "ADBE.N",
+    "CMCSA.N",
+    "NKE.N",
+    "XOM.N",
+    "TM.N",
+    "KO.N",
+    "ORCL.N",
+    "NFLX.N"
+];
+
+var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Barney", "Ned", "Moe"];
 var id = 0;
 
 function randn_bm() {
@@ -24,7 +52,7 @@ function randn_bm() {
 }
 
 function newRow() {
-    id = id % 500;
+    id = id % 1000;
     return {
         name: SECURITIES[Math.floor(Math.random() * SECURITIES.length)],
         client: CLIENTS[Math.floor(Math.random() * CLIENTS.length)],
@@ -37,39 +65,18 @@ function newRow() {
     };
 }
 
-var styleElement = document.createElement("style");
-styleElement.innerText = `
-.homeContainer perspective-viewer, perspective-viewer {
-    box-shadow: none !important;
-    overflow: visible !important;
-    --plugin--box-shadow:  0 2px 4px 0 rgb(0 0 0 / 10%);
-}
-
-.homeContainer perspective-viewer {
-    background: none !important;
-}`;
-
-document.head.appendChild(styleElement);
-
-var freq = 1,
-    freqdir = 1,
+var freq = 100,
     elem;
 
 function update(table) {
-    var viewport_height = document.documentElement.clientHeight;
-    if (viewport_height - window.scrollY > 0) {
-        table.update([newRow(), newRow(), newRow()]);
+    if (freq !== 190) {
+        var viewport_height = document.documentElement.clientHeight;
+        if (viewport_height - window.scrollY > 0) {
+            table.update([newRow(), newRow(), newRow()]);
+        }
     }
-    // if (freq === 0) {
-    //     setTimeout(() => update(table), 3000);
-    //     // freqdir = 1;
-    // } else {
-    setTimeout(() => update(table), 100);
-    // }
-    // if (freq > 60) {
-    //     freqdir = -1;
-    // }
-    // freq += freqdir;
+
+    setTimeout(() => update(table), freq);
 }
 
 function select(id) {
@@ -175,7 +182,7 @@ window.addEventListener("DOMContentLoaded", async function() {
     }
 
     var data = [];
-    for (var x = 0; x < 500; x++) {
+    for (var x = 0; x < 1000; x++) {
         data.push(newRow());
     }
     elem = Array.prototype.slice.call(document.querySelectorAll("perspective-viewer"))[0];
@@ -188,13 +195,17 @@ window.addEventListener("DOMContentLoaded", async function() {
         update(tbl, 0);
     });
 
-    document.querySelector("#grid").addEventListener("mouseenter", () => select("#grid"));
-    document.querySelector("#grid2").addEventListener("mouseenter", () => select("#grid2"));
-    document.querySelector("#cyclone").addEventListener("mouseenter", () => select("#cyclone"));
-    document.querySelector("#pivot").addEventListener("mouseenter", () => select("#pivot"));
-    document.querySelector("#crosssect").addEventListener("mouseenter", () => select("#crosssect"));
-    document.querySelector("#intersect").addEventListener("mouseenter", () => select("#intersect"));
-    document.querySelector("#enhance").addEventListener("mouseenter", () => select("#enhance"));
+    document.querySelector("#velocity").addEventListener("input", function(event) {
+        freq = (-9 / 5) * this.value + 190;
+    });
+
+    document.querySelector("#grid").addEventListener("mousedown", () => select("#grid"));
+    document.querySelector("#grid2").addEventListener("mousedown", () => select("#grid2"));
+    document.querySelector("#cyclone").addEventListener("mousedown", () => select("#cyclone"));
+    document.querySelector("#pivot").addEventListener("mousedown", () => select("#pivot"));
+    document.querySelector("#crosssect").addEventListener("mousedown", () => select("#crosssect"));
+    document.querySelector("#intersect").addEventListener("mousedown", () => select("#intersect"));
+    document.querySelector("#enhance").addEventListener("mousedown", () => select("#enhance"));
 
     select("#grid");
 

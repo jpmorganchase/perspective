@@ -11,6 +11,7 @@ mod limits;
 pub mod registry;
 mod render_timer;
 
+use crate::js::perspective::JsPerspectiveView;
 use crate::js::perspective_viewer::*;
 use crate::session::Session;
 use crate::utils::*;
@@ -175,49 +176,59 @@ impl Renderer {
             .await
     }
 
-    pub async fn draw(&self, session: &Session) -> Result<JsValue, JsValue> {
+    pub async fn draw(
+        &self,
+        session: impl Future<Output = &Session>,
+    ) -> Result<JsValue, JsValue> {
         self.draw_plugin(session, false).await
     }
 
     pub async fn update(&self, session: &Session) -> Result<JsValue, JsValue> {
-        self.draw_plugin(session, true).await
+        self.draw_plugin(async { session }, true).await
     }
 
     async fn draw_plugin(
         &self,
-        session: &Session,
+        session: impl Future<Output = &Session>,
         is_update: bool,
     ) -> Result<JsValue, JsValue> {
         let timer = self.render_timer();
-        let draw_mutex = self.draw_lock();
         let task = async move {
             if is_update {
                 set_timeout(timer.get_avg()).await?;
             }
 
-            let task = async {
-                if let Some(view) = session.get_view() {
-                    let plugin = self.get_active_plugin()?;
-                    let limits = get_row_and_col_limits(&view, &plugin).await?;
-                    self.0.borrow().on_limits_changed.emit_all(limits);
-                    let vieux_elem = &self.0.borrow().vieux_elem.clone();
-                    activate_plugin(&vieux_elem, &plugin, async {
-                        if is_update {
-                            plugin.update(&view, limits.2, limits.3, false).await
-                        } else {
-                            plugin.draw(&view, limits.2, limits.3, false).await
-                        }
-                    })
-                    .await
-                } else {
-                    Ok(JsValue::from(true))
-                }
-            };
-
-            timer.capture_time(task).await
+            if let Some(view) = session.await.get_view() {
+                timer.capture_time(self.draw_view(&view, is_update)).await
+            } else {
+                Ok(JsValue::from(true))
+            }
         };
 
-        draw_mutex.debounce(task).await
+        let draw_mutex = self.draw_lock();
+        if is_update {
+            draw_mutex.debounce(task).await
+        } else {
+            draw_mutex.lock(task).await
+        }
+    }
+
+    async fn draw_view(
+        &self,
+        view: &JsPerspectiveView,
+        is_update: bool,
+    ) -> Result<JsValue, JsValue> {
+        let plugin = self.get_active_plugin()?;
+        let limits = get_row_and_col_limits(&view, &plugin).await?;
+        self.0.borrow().on_limits_changed.emit_all(limits);
+        let vieux_elem = &self.0.borrow().vieux_elem.clone();
+        if is_update {
+            let task = plugin.update(&view, limits.2, limits.3, false);
+            activate_plugin(&vieux_elem, &plugin, task).await
+        } else {
+            let task = plugin.draw(&view, limits.2, limits.3, false);
+            activate_plugin(&vieux_elem, &plugin, task).await
+        }
     }
 
     pub async fn presize(

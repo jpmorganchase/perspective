@@ -129,15 +129,19 @@ impl PerspectiveVieuxElement {
     /// # Arguments
     /// - `update` The config to restore to, as returned by `.save()`.
     pub fn js_restore(&self, update: JsPerspectiveViewConfigUpdate) -> js_sys::Promise {
-        future_to_promise({
-            let session = self.session.clone();
-            let renderer = self.renderer.clone();
-            async move {
-                let update = update.into_serde().to_jserror()?;
-                session.create_view(update).await?;
-                drop(renderer.draw(&session).await?);
-                Ok(session.get_view().as_ref().unwrap().as_jsvalue())
-            }
+        let session = self.session.clone();
+        let renderer = self.renderer.clone();
+        future_to_promise(async move {
+            let update = update.into_serde().to_jserror()?;
+            drop(
+                renderer
+                    .draw(async {
+                        session.create_view(update).await.unwrap();
+                        &session
+                    })
+                    .await?,
+            );
+            Ok(session.get_view().as_ref().unwrap().as_jsvalue())
         })
     }
 

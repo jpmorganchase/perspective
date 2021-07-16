@@ -164,6 +164,50 @@ h2.headerTitle {
 }
 
 .homeContainer perspective-viewer, perspective-viewer {
+    box-shadow: none !important;
+    /* overflow: visible !important; */
+    --plugin--box-shadow:  0 2px 4px 0 rgb(0 0 0 / 10%);
+}
+
+.slider {
+    margin-top: 12px;
+    width: 200px;
+    -webkit-appearance: none;
+    height: 10px;
+    border-radius: 5px;  
+    background: rgba(0,0,0,0.5);
+    border-color: #f9f9f9;
+    border: 1px solid #666;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+  }
+  
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%; 
+    background: #242526;
+    border: 1px solid #666;
+    cursor: pointer;
+  }
+  
+  .slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #04AA6D;
+    cursor: pointer;
+  }
+
+.homeContainer perspective-viewer {
+    background: none !important;
+}
+
+.homeContainer perspective-viewer, perspective-viewer {
     --d3fc-full--gradient: linear-gradient(#4d342f 0%, #e4521b 22.5%, #feeb65 42.5%, #f0f0f0 50%, #dcedc8 57.5%, #42b3d5 67.5%, #1a237e 100%);
     --d3fc-positive--gradient: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%);
     --d3fc-negative--gradient: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%);
